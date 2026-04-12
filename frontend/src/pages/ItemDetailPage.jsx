@@ -5,13 +5,13 @@ import { useAuth } from '../context/AuthContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const FILTER_OPTIONS = [
-  { label: 'All items', hasChevron: false },
-  { label: 'Bottles', hasChevron: true },
-  { label: 'Hats', hasChevron: true },
-  { label: 'Keys', hasChevron: true },
-  { label: 'Clothes', hasChevron: true },
-  { label: 'Electronic devices', hasChevron: true },
-  { label: 'Locations', hasChevron: true },
+  { label: 'All items' },
+  { label: 'Bottles' },
+  { label: 'Hats' },
+  { label: 'Keys' },
+  { label: 'Clothes' },
+  { label: 'Electronic devices' },
+  { label: 'Locations' },
 ]
 
 function ChevronDown() {
@@ -82,9 +82,25 @@ export default function ItemDetailPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
 
-      {/* Filter bar */}
-      <div className="px-8 py-5">
-        <div className="max-w-3xl mx-auto border border-gray-300 rounded-full px-6 py-3 flex items-center justify-between">
+      {/* Search + Filter bar */}
+      <div className="border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
+        {/* Search — left aligned */}
+        <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-1.5 w-48 flex-shrink-0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search..."
+            className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full"
+            onKeyDown={e => { if (e.key === 'Enter') navigate(`/?q=${e.target.value}`) }}
+          />
+        </div>
+
+        {/* Filter pills — right aligned */}
+        <div className="flex-1 flex items-center justify-end gap-1">
+        <div className="border border-gray-300 rounded-full px-5 py-2 flex items-center gap-4">
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt.label}
@@ -103,14 +119,15 @@ export default function ItemDetailPage() {
                 )}
               </span>
               <span className="whitespace-nowrap">{opt.label}</span>
-              {opt.hasChevron && <ChevronDown />}
             </button>
           ))}
         </div>
+        </div>
+      </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 max-w-5xl mx-auto w-full px-8 pb-10">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pb-10">
         <div className="flex gap-10 items-start">
 
           {/* Left — image */}
@@ -119,11 +136,11 @@ export default function ItemDetailPage() {
               <img
                 src={item.imageUrl}
                 alt={item.name}
-                className="w-full object-contain bg-gray-50"
+                className="w-full object-contain bg-gray-50 rounded-2xl"
                 style={{ maxHeight: '460px' }}
               />
             ) : (
-              <div className="w-full bg-gray-100 flex items-center justify-center" style={{ height: '380px' }}>
+              <div className="w-full bg-gray-100 rounded-2xl flex items-center justify-center" style={{ height: '380px' }}>
                 <span className="text-gray-400 text-sm">No image</span>
               </div>
             )}
@@ -142,7 +159,7 @@ export default function ItemDetailPage() {
             {/* Location subtitle */}
             {item.locationFound && (
               <p className="text-sm text-gray-500 mb-5">
-                Detected near {item.locationFound}
+                {item.locationFound}
               </p>
             )}
 

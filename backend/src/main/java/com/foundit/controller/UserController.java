@@ -12,10 +12,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +27,7 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserHistoryRepository userHistoryRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal User currentUser) {
@@ -55,6 +58,31 @@ public class UserController {
 
         User saved = userRepository.save(user);
         return ResponseEntity.ok(toProfileResponse(saved));
+    }
+
+    @PostMapping("/me/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal User currentUser) {
+
+        String currentPassword = body.get("currentPassword");
+        String newPassword = body.get("newPassword");
+
+        if (!StringUtils.hasText(currentPassword) || !StringUtils.hasText(newPassword)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Both fields are required"));
+        }
+        if (!passwordEncoder.matches(currentPassword, currentUser.getPassword())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Current password is incorrect"));
+        }
+        if (newPassword.length() < 6) {
+            return ResponseEntity.badRequest().body(Map.of("message", "New password must be at least 6 characters"));
+        }
+
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
     }
 
     @GetMapping("/me/history")
