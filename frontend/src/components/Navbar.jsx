@@ -5,6 +5,7 @@ import { Client } from '@stomp/stompjs'
 import { useAuth } from '../context/AuthContext'
 import { getNotifications, markRead } from '../api/notifications'
 import PostItemModal from './PostItemModal'
+import { getLatestNotifications } from '../utils/notifications'
 
 function timeAgo(dateStr) {
   if (!dateStr) return ''
@@ -78,10 +79,11 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const unreadCount = notifications.filter(n => n.status === 'UNREAD').length
+  const latestNotifications = getLatestNotifications(notifications)
+  const unreadCount = latestNotifications.filter(n => n.status === 'UNREAD').length
   const displayed = notifFilter === 'unread'
-    ? notifications.filter(n => n.status === 'UNREAD')
-    : notifications
+    ? latestNotifications.filter(n => n.status === 'UNREAD')
+    : latestNotifications
 
   const handleNotifClick = async (n) => {
     if (n.status === 'UNREAD') {
