@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bell, CheckCircle } from 'lucide-react'
 import { getNotifications, markRead } from '../api/notifications'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { getLatestNotifications } from '../utils/notifications'
 
 export default function NotificationsPage() {
   const navigate = useNavigate()
@@ -39,15 +40,17 @@ export default function NotificationsPage() {
     if (n.status === 'UNREAD') {
       await handleMarkRead(n.id)
     }
-    if (n.lostItemId) navigate(`/items/${n.lostItemId}`)
+    if (n.chatSenderId) navigate(`/chat/${n.chatSenderId}`)
+    else if (n.lostItemId) navigate(`/items/${n.lostItemId}`)
     else if (n.foundItemId) navigate(`/items/${n.foundItemId}`)
   }
 
+  const latestNotifications = getLatestNotifications(notifications)
   const displayed = filter === 'unread'
-    ? notifications.filter((n) => n.status === 'UNREAD')
-    : notifications
+    ? latestNotifications.filter((n) => n.status === 'UNREAD')
+    : latestNotifications
 
-  const unreadCount = notifications.filter((n) => n.status === 'UNREAD').length
+  const unreadCount = latestNotifications.filter((n) => n.status === 'UNREAD').length
 
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
