@@ -33,10 +33,10 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${res.data.name || 'there'}!`)
       navigate('/', { replace: true })
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || 'Invalid email or password'
-      setError(typeof msg === 'string' ? msg : 'Login failed. Please try again.')
+      const msg = err.response?.data?.message || err.response?.data || 'Invalid email or password' // 
+      setError(typeof msg === 'string' ? msg : 'Login failed. Please try again.') /*this checks if the message is a string; if it's an object, shows a generic error instead*/
     } finally {
-      setLoading(false)
+      setLoading(false) // stops the loading state regardless of success/failure
     }
   }
 
@@ -101,8 +101,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <span className="text-red-500 text-sm mt-0.5">!</span>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}

@@ -61,6 +61,14 @@ export default function ChatPage() {
       .then(res => setMessages(res.data || []))
       .catch(() => {})
       .finally(() => setLoadingMessages(false))
+
+    const interval = setInterval(() => {
+      getConversation(partnerId)
+        .then(res => setMessages(res.data || []))
+        .catch(() => {})
+    }, 3000)
+
+    return () => clearInterval(interval)
   }, [partnerId])
 
   useEffect(() => {

@@ -59,7 +59,7 @@ public class AuthService {
     public AuthResponse login(LoginRequest req) {
         String email = req.getEmail().trim().toLowerCase();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new BadCredentialsException("Invalid credentials")); 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
@@ -69,13 +69,18 @@ public class AuthService {
 
     @Transactional
     public void forgotPassword(String email) {
-        email = email.trim().toLowerCase();
+        // This function generates a password reset token and sends it via email. It does not reveal whether the email exists in the system for security reasons.
+        // but emails are public anyway? so no acc found is more friednly since users immediately know they made a typo in their email instead of waiting for 15 minutes to find out the code doesn't work
+        // why trang@fulbright.edu.vn it still send email and says We sent a code to trang@fulbright.edu.vn. Enter that code to confirm your account?
+        // while with trang@student.fulbright.edu.vn it says sth went wrong due to argument exception?
         if (!userRepository.existsByEmail(email)) {
             // Return silently — don't reveal whether email exists
-            return;
+            // return; 
+            // throwing an exception is more user-friendly since users immediately know they made a typo in their email instead of waiting for 15 minutes to find out the code doesn't work
+            throw new IllegalArgumentException("No account found with that email"); // frontend handles this in which part
         }
         // Delete any existing tokens for this email
-        passwordResetTokenRepository.deleteByEmail(email);
+        passwordResetTokenRepository.deleteByEmail(email); 
 
         // Generate 6-digit OTP
         String code = String.format("%06d", new Random().nextInt(999999));
