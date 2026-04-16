@@ -90,41 +90,41 @@ export default function PostItemModal({ type, onClose }) {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="w-full max-w-xl rounded-2xl p-8 relative max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-xl rounded-2xl px-8 py-5 relative max-h-[90vh] overflow-y-auto"
         style={{ backgroundColor: '#03045E' }}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
+          className="absolute top-3 right-4 text-white/60 hover:text-white transition-colors"
         >
           <X size={20} />
         </button>
 
         {/* Title pill */}
-        <div className="flex justify-center mb-6">
-          <span className="bg-brand-gold text-white font-bold text-sm px-6 py-2 rounded-full tracking-wide uppercase">
+        <div className="flex justify-center mb-4">
+          <span className="bg-brand-gold text-white font-bold text-sm px-6 py-1.5 rounded-full tracking-wide uppercase">
             {isFound ? 'Found Item Report' : 'Lost Item Report'}
           </span>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Item Name */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">Item Name</label>
+            <label className="block text-white text-sm font-medium mb-0.5">Item Name</label>
             <input
               name="name" type="text" value={form.name} onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
+              className="w-full px-4 py-2 rounded-lg bg-white text-gray-900 text-sm outline-none"
               placeholder="e.g. Water bottle, Laptop..."
             />
           </div>
 
           {/* Location */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">Location</label>
+            <label className="block text-white text-sm font-medium mb-0.5">Location</label>
             <select
               name="locationFound" value={form.locationFound} onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
+              className="w-full px-4 py-2 rounded-lg bg-white text-gray-900 text-sm outline-none"
             >
               <option value="">Select location</option>
               {LOCATIONS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
@@ -133,33 +133,33 @@ export default function PostItemModal({ type, onClose }) {
 
           {/* Date */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">Date</label>
+            <label className="block text-white text-sm font-medium mb-0.5">Date</label>
             <input
               name="date" type="date" value={form.date} onChange={handleChange}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
+              className="w-full px-4 py-2 rounded-lg bg-white text-gray-900 text-sm outline-none"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">Description</label>
+            <label className="block text-white text-sm font-medium mb-0.5">Description</label>
             <textarea
-              name="description" rows={3} value={form.description} onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none resize-none"
+              name="description" rows={2} value={form.description} onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg bg-white text-gray-900 text-sm outline-none resize-none"
               placeholder="Describe the item..."
             />
           </div>
 
           {/* Photo Upload */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">
+            <label className="block text-white text-sm font-medium mb-0.5">
               Photo Upload{!isFound && ' (If available)'}
             </label>
             {imagePreview ? (
               <div className="relative w-full">
                 <img src={imagePreview} alt="Preview"
-                  className="w-full max-h-48 object-contain rounded-lg bg-white" />
+                  className="w-full max-h-32 object-contain rounded-lg bg-white" />
                 <button type="button" onClick={clearImage}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
                   <X size={14} />
@@ -167,7 +167,7 @@ export default function PostItemModal({ type, onClose }) {
               </div>
             ) : (
               <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-500 text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
+                className="w-full px-4 py-2 rounded-lg bg-white text-gray-500 text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
                 <Upload size={15} /> Upload Image
               </button>
             )}
@@ -178,9 +178,9 @@ export default function PostItemModal({ type, onClose }) {
           {/* Save as public — Found only */}
           {isFound && (
             <div>
-              <label className="block text-white text-sm font-medium mb-1">Save form as public</label>
+              <label className="block text-white text-sm font-medium mb-0.5">Save form as public</label>
               <select name="isPublic" value={form.isPublic} onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none">
+                className="w-full px-4 py-2 rounded-lg bg-white text-gray-900 text-sm outline-none">
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
               </select>
@@ -189,9 +189,9 @@ export default function PostItemModal({ type, onClose }) {
 
           {error && <p className="text-red-300 text-sm">{error}</p>}
 
-          <div className="pt-2">
+          <div className="pt-1">
             <button type="submit" disabled={submitting || uploading}
-              className="w-full py-2.5 bg-brand-gold text-white font-bold rounded-full text-sm uppercase tracking-wide hover:bg-yellow-500 disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+              className="w-1/4 mx-auto py-2 bg-brand-gold text-white font-bold rounded-full text-sm uppercase tracking-wide hover:bg-yellow-500 disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
               {uploading ? <><LoadingSpinner size="sm" color="white" /> Uploading...</>
                : submitting ? <><LoadingSpinner size="sm" color="white" /> Submitting...</>
                : 'Submit'}
