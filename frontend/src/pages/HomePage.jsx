@@ -82,13 +82,13 @@ export default function HomePage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-full text-sm outline-none"
             />
           </form>
 
           {/* Categories */}
           <div className="mb-5">
-            <p className="text-sm font-semibold text-gray-700 mb-2">Categories</p>
+            <p className="text-sm font-semibold text-gray-1000 mb-2">Categories</p>
             {CATEGORIES.map((cat) => (
               <label
                 key={cat.value}
@@ -108,7 +108,7 @@ export default function HomePage() {
 
           {/* Locations */}
           <div>
-            <p className="text-sm font-semibold text-gray-700 mb-2">Locations</p>
+            <p className="text-sm font-semibold text-gray-1000 mb-2">Locations</p>
             {LOCATIONS.map((loc) => (
               <label
                 key={loc}
