@@ -30,15 +30,14 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
 
-  const fetchItems = async (kw, cat) => {
+  const fetchItems = async (cat) => {
     try {
       setLoading(true)
       setError('')
-      const res = await getItems({ keyword: kw, category: cat })
+      const res = await getItems({ category: cat })
       setAllItems(res.data || [])
     } catch {
       setError('Failed to load items.')
@@ -48,13 +47,8 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    fetchItems(keyword, category)
-  }, [keyword, category])
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-    setKeyword(searchInput)
-  }
+    fetchItems(category)
+  }, [category])
 
   const handleCategoryChange = (val) => {
     setCategory(val)
@@ -65,9 +59,14 @@ export default function HomePage() {
     setLocation(prev => prev === val ? '' : val)
   }
 
-  const displayedItems = location
-    ? allItems.filter(item => item.locationFound === location)
-    : allItems
+  const displayedItems = allItems.filter(item => {
+    const q = searchInput.trim().toLowerCase()
+    const matchesSearch = !q ||
+      item.name?.toLowerCase().includes(q) ||
+      item.locationFound?.toLowerCase().includes(q)
+    const matchesLocation = !location || item.locationFound === location
+    return matchesSearch && matchesLocation
+  })
 
   return (
     <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 64px)' }}>
@@ -76,7 +75,7 @@ export default function HomePage() {
         {/* Sidebar */}
         <aside className="w-52 flex-shrink-0 bg-white border-r border-gray-200 pt-4 pr-4 pb-4 pl-6">
           {/* Search */}
-          <form onSubmit={handleSearch} className="mb-5">
+          <div className="mb-5">
             <input
               type="text"
               value={searchInput}
@@ -84,7 +83,7 @@ export default function HomePage() {
               placeholder="Search"
               className="w-full px-3 py-2 border border-gray-300 rounded-full text-sm outline-none"
             />
-          </form>
+          </div>
 
           {/* Categories */}
           <div className="mb-5">
