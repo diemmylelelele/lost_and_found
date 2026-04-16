@@ -12,7 +12,7 @@ function getNotificationGroupKey(notification) {
   return `notification:${notification?.id ?? 'unknown'}`
 }
 
-export function getLastestNotifications(notifications = []) {
+export function getLatestNotifications(notifications = []) {
   const latestByGroup = new Map()
 
   notifications.forEach((notification) => {
