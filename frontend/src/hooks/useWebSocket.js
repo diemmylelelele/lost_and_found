@@ -4,7 +4,7 @@ import SockJS from 'sockjs-client'
 
 export function useWebSocket({ onNotification, onMessage, enabled }) {
   const clientRef = useRef(null)
-  const token = localStorage.getItem('token')
+  const token = sessionStorage.getItem('token')
 
   const onNotificationRef = useRef(onNotification)
   const onMessageRef = useRef(onMessage)

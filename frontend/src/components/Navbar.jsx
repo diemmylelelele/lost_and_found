@@ -48,7 +48,7 @@ export default function Navbar() {
   // WebSocket — listen for real-time notifications
   useEffect(() => {
     if (!isAuthenticated) return
-    const token = localStorage.getItem('token')
+    const token = sessionStorage.getItem('token')
     if (!token) return
 
     const wsUrl = `ws://${window.location.host}/ws/websocket`

@@ -94,7 +94,7 @@ export default function ItemCard({ item }) {
       </div>
 
       {/* Content */}
-      <div className="px-3 pt-3 pb-3 flex flex-col gap-2">
+      <div className="px-3 pt-3 pb-3 flex flex-col gap-2 flex-1">
 
         {/* Name + Start the chat */}
         <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export default function ItemCard({ item }) {
         )}
 
         {/* Action button */}
-        <div className="flex justify-center mt-2">
+        <div className="flex justify-center mt-auto pt-2">
           {isClaimed ? (
             <div className="px-8 py-2 text-xs font-semibold text-center text-green-600 bg-green-50 rounded-full border border-green-100">
               Claimed

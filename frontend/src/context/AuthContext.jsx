@@ -7,15 +7,15 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null)
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
+    const storedToken = sessionStorage.getItem('token')
+    const storedUser = sessionStorage.getItem('user')
     if (storedToken && storedUser) {
       try {
         setToken(storedToken)
         setUser(JSON.parse(storedUser))
       } catch {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('user')
       }
     }
   }, [])
@@ -26,15 +26,15 @@ export function AuthProvider({ children }) {
       name: authResponse.name,
       email: authResponse.email
     }
-    localStorage.setItem('token', authResponse.token)
-    localStorage.setItem('user', JSON.stringify(userData))
+    sessionStorage.setItem('token', authResponse.token)
+    sessionStorage.setItem('user', JSON.stringify(userData))
     setToken(authResponse.token)
     setUser(userData)
   }
 
   const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
     setToken(null)
     setUser(null)
   }
