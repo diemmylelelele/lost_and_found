@@ -5,17 +5,14 @@ import { reportFound, reportLost, uploadImage } from '../api/items'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const LOCATIONS = [
-  'Common Area GF',
-  'Library',
-  'Maker Space',
-  'Classroom 1',
-  'Classroom 2',
-  'Classroom 3',
-  'Classroom 4',
-  'Classroom 5',
-  'Classroom 6',
-  'Classroom 7',
-  'Other',
+  'Common Area GF', 'Library', 'Maker Space',
+  'Classroom 1', 'Classroom 2', 'Classroom 3', 'Classroom 4',
+  'Classroom 5', 'Classroom 6', 'Classroom 7', 'Other',
+]
+
+const CATEGORIES = [
+  'Bottles', 'Keys', 'Clothes', 'Electronic devices',
+  'Books', 'Bags', 'ID / Cards', 'Other',
 ]
 
 export default function PostItemPage() {
@@ -25,12 +22,8 @@ export default function PostItemPage() {
   const fileInputRef = useRef(null)
 
   const [form, setForm] = useState({
-    name: '',
-    description: '',
-    category: '',
-    locationFound: '',
-    date: '',
-    isPublic: 'Yes',
+    name: '', description: '', category: '',
+    locationFound: '', date: '', isPublic: 'Yes',
   })
   const [imagePreview, setImagePreview] = useState(null)
   const [imageFile, setImageFile] = useState(null)
@@ -38,9 +31,8 @@ export default function PostItemPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+  const handleChange = (e) =>
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
@@ -96,99 +88,97 @@ export default function PostItemPage() {
     }
   }
 
+  const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:border-gray-400 bg-white'
+
   return (
-    <div className="min-h-[calc(100vh-64spx)] bg-gray-50 flex items-center justify-center py-6 px-4">
-      <div className="w-full max-w-xl rounded-2xl p-8" style={{ backgroundColor: '#03045E' }}>
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-10 pb-16 px-6">
+      <div className="w-full max-w-5xl bg-white rounded-2xl border border-gray-200 shadow-sm px-10 py-8">
 
         {/* Title pill */}
-        <div className="flex justify-center mb-6">
-          <span className="bg-brand-gold text-white font-bold text-sm px-6 py-2 rounded-full tracking-wide uppercase">
+        <div className="flex justify-center mb-7">
+          <span className="bg-gray-100 text-sm font-bold px-8 py-2 rounded-full tracking-widest uppercase" style={{ color: '#03045E' }}>
             {isFound ? 'Found Item Report' : 'Lost Item Report'}
           </span>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Item Name */}
-          <div>
-            <label className="block text-white text-sm font-medium mb-1">Item Name</label>
-            <input
-              name="name"
-              type="text"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
-              placeholder="e.g. Water bottle, Laptop..."
-            />
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-white text-sm font-medium mb-1">Location</label>
-            <select
-              name="locationFound"
-              value={form.locationFound}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
-            >
-              <option value="">Select location</option>
-              {LOCATIONS.map((loc) => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Date */}
-          <div>
-            <label className="block text-white text-sm font-medium mb-1">Date</label>
-            <input
-              name="date"
-              type="date"
-              value={form.date}
-              onChange={handleChange}
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
-            />
+          {/* Row: Item Name + Location + Date */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+              <input
+                name="name"
+                type="text"
+                value={form.name}
+                onChange={handleChange}
+                className={inputCls}
+                placeholder="e.g. Student ID, Laptop..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <select
+                name="locationFound"
+                value={form.locationFound}
+                onChange={handleChange}
+                className={inputCls}
+              >
+                <option value="">Select location</option>
+                {LOCATIONS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                name="date"
+                type="date"
+                value={form.date}
+                onChange={handleChange}
+                max={new Date().toISOString().split('T')[0]}
+                className={inputCls}
+              />
+            </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea
               name="description"
-              rows={3}
+              rows={5}
               value={form.description}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none resize-none"
-              placeholder="Describe the item..."
+              className={`${inputCls} resize-none`}
+              placeholder="Describe the item — colour, brand, distinguishing features..."
             />
           </div>
 
           {/* Photo Upload */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Photo Upload{!isFound && ' (If available)'}
             </label>
             {imagePreview ? (
-              <div className="relative w-full">
+              <div className="relative w-full border border-gray-200 rounded-lg overflow-hidden">
                 <img
                   src={imagePreview}
                   alt="Preview"
-                  className="w-full max-h-64 object-contain rounded-lg bg-white"
+                  className="w-full max-h-40 object-contain bg-gray-50"
                 />
                 <button
                   type="button"
                   onClick={clearImage}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                 >
-                  <X size={14} />
+                  <X size={13} />
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-500 text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                className="w-full py-2.5 border border-gray-300 rounded-lg text-sm text-gray-500 flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors bg-white"
               >
                 <Upload size={15} />
                 Upload Image
@@ -203,15 +193,18 @@ export default function PostItemPage() {
             />
           </div>
 
-          {/* Save as public — Found only */}
+          {/* Post as public — Found only */}
           {isFound && (
-            <div>
-              <label className="block text-white text-sm font-medium mb-1">Save form as public</label>
+            <div className="flex items-center justify-between py-2 border-t border-gray-100">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Post as public</p>
+                <p className="text-xs text-gray-400">Other users will be able to see you name and claim this item</p>
+              </div>
               <select
                 name="isPublic"
                 value={form.isPublic}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg bg-white text-gray-900 text-sm outline-none"
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none"
               >
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
@@ -219,20 +212,22 @@ export default function PostItemPage() {
             </div>
           )}
 
-          {error && <p className="text-red-300 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           {/* Submit */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={submitting || uploading}
-              className="w-full py-2.5 bg-brand-gold text-white font-bold rounded-full text-sm uppercase tracking-wide hover:bg-yellow-500 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
-            >
-              {uploading ? <><LoadingSpinner size="sm" color="white" /> Uploading image...</>
-               : submitting ? <><LoadingSpinner size="sm" color="white" /> Submitting...</>
-               : 'Submit'}
-            </button>
+          <div className="flex justify-center">
+          <button
+            type="submit"
+            disabled={submitting || uploading}
+            className="px-16 py-2.5 rounded-full text-sm font-bold text-white uppercase tracking-widest disabled:opacity-60 transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+            style={{ backgroundColor: '#F5A623' }}
+          >
+            {uploading ? <><LoadingSpinner size="sm" color="white" /> Uploading...</>
+             : submitting ? <><LoadingSpinner size="sm" color="white" /> Submitting...</>
+             : 'Submit'}
+          </button>
           </div>
+
         </form>
       </div>
     </div>

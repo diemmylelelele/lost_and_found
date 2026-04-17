@@ -4,7 +4,6 @@ import { Bell, LogOut, User, ChevronDown } from 'lucide-react'
 import { Client } from '@stomp/stompjs'
 import { useAuth } from '../context/AuthContext'
 import { getNotifications, markRead } from '../api/notifications'
-import PostItemModal from './PostItemModal'
 import { getLatestNotifications } from '../utils/notifications'
 
 function timeAgo(dateStr) {
@@ -24,7 +23,6 @@ export default function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifFilter, setNotifFilter] = useState('all')
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [postModal, setPostModal] = useState(null) // 'found' | 'lost' | null
 
   const notifRef = useRef(null)
   const userMenuRef = useRef(null)
@@ -105,7 +103,6 @@ export default function Navbar() {
   }
 
   return (
-    <>
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
@@ -123,15 +120,13 @@ export default function Navbar() {
             `px-4 py-2 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-gold' : 'text-gray-700 hover:text-brand-gold'}`
           }>Home</NavLink>
 
-          <button
-            onClick={() => setPostModal('found')}
-            className="px-4 py-2 text-sm font-medium rounded-full transition-colors text-gray-700 hover:text-brand-gold"
-          >Found Item Report</button>
+          <NavLink to="/post/found" className={({ isActive }) =>
+            `px-4 py-2 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-gold' : 'text-gray-700 hover:text-brand-gold'}`
+          }>Found Item Report</NavLink>
 
-          <button
-            onClick={() => setPostModal('lost')}
-            className="px-4 py-2 text-sm font-medium rounded-full transition-colors text-gray-700 hover:text-brand-gold"
-          >Lost Item Report</button>
+          <NavLink to="/post/lost" className={({ isActive }) =>
+            `px-4 py-2 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-gold' : 'text-gray-700 hover:text-brand-gold'}`
+          }>Lost Item Report</NavLink>
           {isAuthenticated ? (
             <>
               {/* Notification bell + popup */}
@@ -275,10 +270,5 @@ export default function Navbar() {
 
       </div>
     </nav>
-
-    {postModal && (
-      <PostItemModal type={postModal} onClose={() => setPostModal(null)} />
-    )}
-    </>
   )
 }
