@@ -32,7 +32,8 @@ export default function ItemCard({ item }) {
     itemType,
   } = item
 
-  const displayName = name || 'Unknown Item'
+  const rawName = name || 'Unknown Item'
+  const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1)
   const isFound = status?.toUpperCase() === 'FOUND' || itemType?.toUpperCase() === 'FOUND'
   const isClaimed = status?.toUpperCase() === 'CLAIMED'
   const isOwnItem = user && (String(reporterId) === String(user.id))
@@ -192,7 +193,7 @@ export default function ItemCard({ item }) {
           : showClaim ? (
             <button
               onClick={handleClaimClick}
-              className="px-10 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity"
+              className="px-6 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity"
               style={{ backgroundColor: '#F5A623' }}
             >
               Claim
