@@ -2,6 +2,17 @@ import { useNavigate } from 'react-router-dom'
 import { MapPin, Package, MoreVertical } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
+const VALUABLE_KEYWORDS = [
+  'phone', 'laptop', 'wallet', 'smartwatch', 'tablet', 'airpod',
+  'ipad', 'macbook', 'iphone', 'samsung', 'watch', 'camera',
+]
+
+function isValuableItem(name) {
+  if (!name) return false
+  const lower = name.toLowerCase()
+  return VALUABLE_KEYWORDS.some(k => lower.includes(k))
+}
+
 export default function ItemCard({ item }) {
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
@@ -18,12 +29,18 @@ export default function ItemCard({ item }) {
     reporterName,
     reporterId,
     datePosted,
+    itemType,
   } = item
 
   const displayName = name || 'Unknown Item'
-  const isFound = status?.toUpperCase() === 'FOUND'
+  const isFound = status?.toUpperCase() === 'FOUND' || itemType?.toUpperCase() === 'FOUND'
   const isClaimed = status?.toUpperCase() === 'CLAIMED'
   const isOwnItem = user && (String(reporterId) === String(user.id))
+  const valuable = isValuableItem(name)
+
+  // For valuable found items: hide image and description from non-owners
+  const hidePrivateDetails = valuable && isFound && !isOwnItem && !isClaimed
+
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
     try {
@@ -35,6 +52,16 @@ export default function ItemCard({ item }) {
       })
     } catch {
       return ''
+    }
+  }
+
+  const handleClaimClick = (e) => {
+    e.stopPropagation()
+    if (!isAuthenticated) { navigate('/login'); return }
+    if (valuable && isFound) {
+      navigate(`/claim/${id}`)
+    } else {
+      navigate(`/claim/${id}`)
     }
   }
 
@@ -53,8 +80,8 @@ export default function ItemCard({ item }) {
             {isClaimed
               ? 'Claimed Item'
               : isOwnItem && isFound
-              ? 'Found Item'   // you reported finding this → "Found Item" for you
-              : 'Lost Item'}   {/* everyone else sees it as a lost item to claim */}
+              ? 'Found Item'
+              : 'Lost Item'}
           </p>
           {datePosted && (
             <p className="text-[10px] text-gray-400">Posted at {formatDate(datePosted)}</p>
@@ -68,35 +95,48 @@ export default function ItemCard({ item }) {
         </button>
       </div>
 
-      {/* Image */}
-      <div
-        className="bg-gray-100 cursor-pointer"
-        style={{ height: '200px' }}
-        onClick={() => navigate(`/items/${id}`)}
-      >
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={displayName}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.style.display = 'none'
-              e.target.nextElementSibling.style.display = 'flex'
-            }}
-          />
-        ) : null}
+      {/* Image — hidden for valuable found items (non-owners) */}
+      {!hidePrivateDetails ? (
         <div
-          className={`w-full h-full flex flex-col items-center justify-center bg-gray-100 ${imageUrl ? 'hidden' : 'flex'}`}
+          className="bg-gray-100 cursor-pointer"
+          style={{ height: '200px' }}
+          onClick={() => navigate(`/items/${id}`)}
+        >
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={displayName}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none'
+                e.target.nextElementSibling.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <div
+            className={`w-full h-full flex flex-col items-center justify-center bg-gray-100 ${imageUrl ? 'hidden' : 'flex'}`}
+          >
+            <Package size={36} className="text-gray-300" />
+            <span className="text-xs text-gray-400 mt-1">No image</span>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="bg-gray-100 cursor-pointer flex flex-col items-center justify-center"
+          style={{ height: '200px' }}
+          onClick={() => navigate(`/items/${id}`)}
         >
           <Package size={36} className="text-gray-300" />
-          <span className="text-xs text-gray-400 mt-1">No image</span>
+          <span className="text-xs text-gray-400 mt-2 px-4 text-center">
+            Image hidden for privacy
+          </span>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       <div className="px-3 pt-3 pb-3 flex flex-col gap-2 flex-1">
 
-        {/* Name + Start the chat */}
+        {/* Name + Chat */}
         <div className="flex items-center gap-2">
           <h3
             className="font-bold text-gray-900 text-base flex-1 truncate cursor-pointer"
@@ -123,9 +163,14 @@ export default function ItemCard({ item }) {
           </div>
         )}
 
-        {/* Description */}
-        {description && (
+        {/* Description — hidden for valuable found items (non-owners) */}
+        {description && !hidePrivateDetails && (
           <p className="text-xs text-gray-500 line-clamp-2">{description}</p>
+        )}
+
+        {/* Valuable badge */}
+        {hidePrivateDetails && (
+          <p className="text-xs text-gray-500">Valuable item — verify to claim</p>
         )}
 
         {/* Action button */}
@@ -134,17 +179,16 @@ export default function ItemCard({ item }) {
             <div className="px-8 py-2 text-xs font-semibold text-center text-green-600 bg-green-50 rounded-full border border-green-100">
               Claimed
             </div>
-          ) : isAuthenticated ? (
-            <button
-              onClick={(e) => { e.stopPropagation(); navigate(`/claim/${id}`) }}
-              className="px-10 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#F5A623' }}
+          ) : isOwnItem ? (
+            <div
+              className="px-10 py-2 text-sm font-normal text-center rounded-full"
+              style={{ backgroundColor: '#FEF3C7', color: '#F5A623', border: '1px solid #FDE68A' }}
             >
-              Claim
-            </button>
+              Your Item
+            </div>
           ) : (
             <button
-              onClick={(e) => { e.stopPropagation(); navigate(`/login`) }}
+              onClick={handleClaimClick}
               className="px-10 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity"
               style={{ backgroundColor: '#F5A623' }}
             >

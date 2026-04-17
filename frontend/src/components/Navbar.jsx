@@ -92,6 +92,7 @@ export default function Navbar() {
     }
     setNotifOpen(false)
     if (n.chatSenderId) navigate(`/chat/${n.chatSenderId}`)
+    else if (n.relatedItemId) navigate(`/items/${n.relatedItemId}`)
     else if (n.lostItemId) navigate(`/items/${n.lostItemId}`)
     else if (n.foundItemId) navigate(`/items/${n.foundItemId}`)
   }

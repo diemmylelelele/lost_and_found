@@ -12,6 +12,7 @@ import PostItemPage from './pages/PostItemPage'
 import ChatPage from './pages/ChatPage'
 import NotificationsPage from './pages/NotificationsPage'
 import ProfilePage from './pages/ProfilePage'
+import ClaimVerificationPage from './pages/ClaimVerificationPage'
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
                     <Route path="/chat/:partnerId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
                     <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    <Route path="/claim/:id" element={<ProtectedRoute><ClaimVerificationPage /></ProtectedRoute>} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </>

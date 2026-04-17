@@ -42,4 +42,6 @@ public class Item {
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
+
+    private Long claimantId;
 }

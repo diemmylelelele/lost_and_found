@@ -1,5 +1,6 @@
 package com.foundit.controller;
 
+import com.foundit.dto.ClaimVerificationRequest;
 import com.foundit.dto.ItemRequest;
 import com.foundit.dto.ItemResponse;
 import com.foundit.model.ItemStatus;
@@ -52,6 +53,31 @@ public class ItemController {
             @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(itemService.claimItem(id, currentUser.getId()));
+    }
+
+    /** Non-valuable: claimer requests claim, finder gets notified */
+    @PostMapping("/{id}/claim/simple")
+    public ResponseEntity<ItemResponse> requestSimpleClaim(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(itemService.requestSimpleClaim(id, currentUser.getId()));
+    }
+
+    /** Non-valuable: finder approves the pending claim */
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<ItemResponse> approveClaim(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(itemService.approveClaim(id, currentUser.getId()));
+    }
+
+    /** Valuable: claimer submits verification form */
+    @PostMapping("/{id}/claim/verify")
+    public ResponseEntity<ItemResponse> verifyAndClaim(
+            @PathVariable Long id,
+            @RequestBody ClaimVerificationRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(itemService.verifyAndClaim(id, request, currentUser.getId()));
     }
 
     @GetMapping("/my")

@@ -76,6 +76,45 @@ public class NotificationService {
         pushToUser(recipient, toResponse(saved));
     }
 
+    @Transactional
+    public void createClaimRequestNotification(User finder, Long itemId, String claimerName) {
+        Notification notification = Notification.builder()
+                .user(finder)
+                .message(claimerName + " wants to claim your found item. Tap to verify.")
+                .relatedItemId(itemId)
+                .status(NotificationStatus.UNREAD)
+                .build();
+        Notification saved = notificationRepository.save(notification);
+        pushToUser(finder, toResponse(saved));
+    }
+
+    @Transactional
+    public void createClaimResultNotification(User claimer, Long itemId, boolean matched) {
+        String msg = matched
+                ? "There is a high chance your item matches this found item. Contact the finder to discuss more."
+                : "Your claim could not be verified. The description did not match our records.";
+        Notification notification = Notification.builder()
+                .user(claimer)
+                .message(msg)
+                .relatedItemId(itemId)
+                .status(NotificationStatus.UNREAD)
+                .build();
+        Notification saved = notificationRepository.save(notification);
+        pushToUser(claimer, toResponse(saved));
+    }
+
+    @Transactional
+    public void createClaimMatchNotificationForFinder(User finder, Long itemId, String claimerName) {
+        Notification notification = Notification.builder()
+                .user(finder)
+                .message(claimerName + " has verified to claim this item. There is a high chance this item belongs to them. Contact them to discuss.")
+                .relatedItemId(itemId)
+                .status(NotificationStatus.UNREAD)
+                .build();
+        Notification saved = notificationRepository.save(notification);
+        pushToUser(finder, toResponse(saved));
+    }
+
     private void pushToUser(User user, NotificationResponse response) {
         messagingTemplate.convertAndSendToUser(
                 user.getEmail(),
@@ -100,6 +139,7 @@ public class NotificationService {
                 .foundItemId(foundItemId)
                 .chatSenderId(n.getChatSenderId())
                 .chatSenderName(n.getChatSenderName())
+                .relatedItemId(n.getRelatedItemId())
                 .build();
     }
 }

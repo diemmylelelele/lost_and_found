@@ -22,4 +22,5 @@ public class NotificationResponse {
     private Long foundItemId;
     private Long chatSenderId;
     private String chatSenderName;
+    private Long relatedItemId;
 }

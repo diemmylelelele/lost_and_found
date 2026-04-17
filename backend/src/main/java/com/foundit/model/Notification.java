@@ -32,6 +32,9 @@ public class Notification {
     private Long chatSenderId;
     private String chatSenderName;
 
+    // For item-related notifications
+    private Long relatedItemId;
+
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
