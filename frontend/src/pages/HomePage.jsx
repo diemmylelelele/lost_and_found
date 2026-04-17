@@ -71,7 +71,7 @@ export default function HomePage() {
           {FILTER_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer hover:text-gray-900 transition-colors select-none"
+              className="flex items-center gap-1.5 text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors select-none"
             >
               <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0`}
                 style={activeFilter === opt.value
@@ -111,7 +111,7 @@ export default function HomePage() {
             <p className="text-sm mt-1">Try adjusting your filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {displayedItems.map((item) => (
               <ItemCard key={item.id} item={item} />
             ))}

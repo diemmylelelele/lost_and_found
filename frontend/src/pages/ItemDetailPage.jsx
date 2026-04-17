@@ -134,7 +134,7 @@ export default function ItemDetailPage() {
               {FILTER_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer hover:text-gray-900 transition-colors select-none"
+                  className="flex items-center gap-1.5 text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors select-none"
                 >
                   <span
                     className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"

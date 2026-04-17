@@ -55,14 +55,27 @@ export default function ItemCard({ item }) {
     }
   }
 
+  // Header label
+  const headerLabel = isClaimed
+    ? 'Claimed Item'
+    : isOwnItem && isFound
+    ? 'You found this item'
+    : isOwnItem && !isFound
+    ? "You're searching for"
+    : isFound
+    ? `${reporterName || 'Someone'} found item`
+    : `${reporterName || 'Someone'} is searching for`
+
+  // Show chat button only for non-own items
+  const showChat = isAuthenticated && !isOwnItem && !isClaimed
+
+  // Show claim button only for found items viewed by non-owners
+  const showClaim = isAuthenticated && !isOwnItem && isFound && !isClaimed
+
   const handleClaimClick = (e) => {
     e.stopPropagation()
     if (!isAuthenticated) { navigate('/login'); return }
-    if (valuable && isFound) {
-      navigate(`/claim/${id}`)
-    } else {
-      navigate(`/claim/${id}`)
-    }
+    navigate(`/claim/${id}`)
   }
 
   return (
@@ -77,11 +90,7 @@ export default function ItemCard({ item }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-gray-800 truncate">
-            {isClaimed
-              ? 'Claimed Item'
-              : isOwnItem && isFound
-              ? 'Found Item'
-              : 'Lost Item'}
+            {headerLabel}
           </p>
           {datePosted && (
             <p className="text-[10px] text-gray-400">Posted at {formatDate(datePosted)}</p>
@@ -128,7 +137,7 @@ export default function ItemCard({ item }) {
         >
           <Package size={36} className="text-gray-300" />
           <span className="text-xs text-gray-400 mt-2 px-4 text-center">
-            Image hidden for privacy
+            Image hidden for valuable item
           </span>
         </div>
       )}
@@ -144,7 +153,7 @@ export default function ItemCard({ item }) {
           >
             {displayName}
           </h3>
-          {isAuthenticated && !isOwnItem && (
+          {showChat && (
             <button
               onClick={(e) => { e.stopPropagation(); navigate(`/chat/${reporterId}`) }}
               className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-white rounded-full whitespace-nowrap hover:opacity-90 transition-opacity"
@@ -179,14 +188,8 @@ export default function ItemCard({ item }) {
             <div className="px-8 py-2 text-xs font-semibold text-center text-green-600 bg-green-50 rounded-full border border-green-100">
               Claimed
             </div>
-          ) : isOwnItem ? (
-            <div
-              className="px-10 py-2 text-sm font-normal text-center rounded-full"
-              style={{ backgroundColor: '#FEF3C7', color: '#F5A623', border: '1px solid #FDE68A' }}
-            >
-              Your Item
-            </div>
-          ) : (
+          ) : isOwnItem ? null
+          : showClaim ? (
             <button
               onClick={handleClaimClick}
               className="px-10 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity"
@@ -194,7 +197,7 @@ export default function ItemCard({ item }) {
             >
               Claim
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
