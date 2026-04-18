@@ -216,7 +216,7 @@ export default function ItemDetailPage() {
             {/* Action buttons — below description */}
             {isClaimed ? (
               <div className="p-3 rounded-lg text-sm text-center font-medium" style={{ backgroundColor: '#FEF3C7', color: '#F5A623' }}>
-                This item has been claimed
+                This item has been claimed{item.claimantName ? ` by ${item.claimantName}` : ''}
               </div>
             ) : isOwner && hasPendingClaim ? (
               <div className="flex flex-col gap-3">

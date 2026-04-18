@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MatchingService {
 
-    private static final float MATCH_THRESHOLD = 0.15f;
+    private static final float MATCH_THRESHOLD = 0.50f;
     private static final Set<String> STOP_WORDS = Set.of(
             "the", "a", "an", "is", "it", "this", "that", "was", "are",
             "has", "have", "had", "for", "and", "but", "or", "not", "with");
@@ -97,7 +97,6 @@ public class MatchingService {
         StringBuilder sb = new StringBuilder();
         if (item.getName() != null) sb.append(item.getName()).append(" ");
         if (item.getDescription() != null) sb.append(item.getDescription()).append(" ");
-        if (item.getCategory() != null) sb.append(item.getCategory()).append(" ");
         if (item.getLocationFound() != null) sb.append(item.getLocationFound());
         return sb.toString();
     }
