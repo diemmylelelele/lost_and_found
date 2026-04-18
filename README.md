@@ -1,27 +1,28 @@
-# FoundIt
+# FoundIt! Fulbright
 
-The scope of this project is to develop a centralized, digital lost-and-found management system specifically for the Fulbright University Vietnam community only.
-The development will focus on the following core functionalities:
+This project aims to build a platform that allows staff and students within the Fulbright community to report lost items or found belongings and reconnect them with their owners. The development will focus on the following core functionalities:
+
 - Reporting lost and found items
-- Searching and filtering items
+- Searching and filtering listings
 - Messaging/chat between users
-- Smart auto-matching between lost and found items
-- Claim and verification process
+- Smart auto-matching of lost and found items
+- Claim submission and verification process
 
 ---
 
+## Demo Video
+This is the link to demo video
+
 ## Completed Features
 
-- Register / Login with JWT authentication
-- Report found or lost items 
-- Browse items — filter by category, search by keyword
-- Item detail page with claim and chat actions
-- Simple claim flow for non-valuable items (finder approves)
-- Verification-based claim flow for valuable items (score-based matching)
-- Smart auto-matching engine between lost and found items (Jaccard similarity on name, description, location)
-- Real-time notifications for matches and claim updates (WebSocket + polling)
-- Real-time chat between users (WebSocket)
-- Delete posted items (blocked if item is already claimed)
+- User authentication: Register, Login, and Reset Password
+- Submit reports for lost or found items
+- Browse listings with category filters and keyword search
+- Verification-based claim process for valuable items using score-based matching
+- Smart auto-matching engine for lost and found items using Jaccard similarity across item name,description, and location. Future improvements include AI-powered image analysis.
+- Real-time notifications for item matches and new messages
+- Real-time user-to-user chat powered by WebSocket
+- Delete posted items with ownership control (users can only delete their own posts, and claimed items - cannot be removed)
 
 ---
 
