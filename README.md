@@ -10,8 +10,8 @@ This project aims to build a platform that allows staff and students within the 
 
 ---
 
-## Demo Video
-This is the link to demo video
+## Demo Usage
+This is the link to demo [video](https://youtu.be/L-vK67Z2Nd8?si=iu0jQtp2zdl0lVSX)
 
 ## Completed Features
 
