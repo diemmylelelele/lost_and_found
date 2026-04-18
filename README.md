@@ -24,11 +24,13 @@ This is the link to demo [video](https://youtu.be/L-vK67Z2Nd8?si=iu0jQtp2zdl0lVS
 - Real-time user-to-user chat powered by WebSocket
 - Delete posted items with ownership control (users can only delete their own posts, and claimed items - cannot be removed)
 
+## Link GitHub repository
+
+https://github.com/diemmylelelele/lost_and_found.git
+
 ---
 
 ## How to Run the Project
-
-You need **two terminals** open at the same time.
 
 ### Prerequisites
 
