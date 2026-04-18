@@ -84,4 +84,12 @@ public class ItemController {
     public ResponseEntity<List<ItemResponse>> getMyItems(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(itemService.getItemsByUser(currentUser.getId()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteItem(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        itemService.deleteItem(id, currentUser.getId());
+        return ResponseEntity.noContent().build();
+    }
 }

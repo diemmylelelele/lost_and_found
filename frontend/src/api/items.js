@@ -9,6 +9,7 @@ export const claimSimple = (id) => api.post(`/items/${id}/claim/simple`)
 export const claimWithVerification = (id, data) => api.post(`/items/${id}/claim/verify`, data)
 export const approveClaim = (id) => api.post(`/items/${id}/approve`)
 export const getMyItems = () => api.get('/items/my')
+export const deleteItem = (id) => api.delete(`/items/${id}`)
 
 export const uploadImage = (file) => {
   const formData = new FormData()

@@ -8,6 +8,8 @@ import com.foundit.model.ItemStatus;
 import com.foundit.model.User;
 import com.foundit.model.UserHistory;
 import com.foundit.repository.ItemRepository;
+import com.foundit.repository.MatchRepository;
+import com.foundit.repository.NotificationRepository;
 import com.foundit.repository.UserHistoryRepository;
 import com.foundit.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +31,8 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final UserHistoryRepository userHistoryRepository;
+    private final MatchRepository matchRepository;
+    private final NotificationRepository notificationRepository;
     private final MatchingService matchingService;
     private final NotificationService notificationService;
 
@@ -56,7 +60,8 @@ public class ItemService {
                 .locationFound(req.getLocationFound())
                 .imageUrl(req.getImageUrl())
                 .itemType(itemType)
-                .status(itemType)  // Initial status mirrors the type (LOST or FOUND)
+                .status(itemType)
+                .isPublic(req.isPublic())
                 .build();
 
         Item saved = itemRepository.save(item);
@@ -115,9 +120,8 @@ public class ItemService {
 
         return items.stream()
                 .sorted((a, b) -> {
-                    boolean aClaimed = a.getStatus() == ItemStatus.CLAIMED;
-                    boolean bClaimed = b.getStatus() == ItemStatus.CLAIMED;
-                    if (aClaimed != bClaimed) return aClaimed ? 1 : -1;
+                    int groupDiff = sortGroup(a) - sortGroup(b);
+                    if (groupDiff != 0) return groupDiff;
                     return b.getDatePosted().compareTo(a.getDatePosted());
                 })
                 .map(this::toResponse)
@@ -243,6 +247,12 @@ public class ItemService {
         return toResponse(item);
     }
 
+    private int sortGroup(Item item) {
+        if (item.getStatus() == ItemStatus.CLAIMED) return 2;   // last
+        if (item.getItemType() == ItemStatus.LOST) return 1;    // searching
+        return 0;                                                // found first
+    }
+
     private int matchesClaim(Item item, ClaimVerificationRequest req) {
         int score = 0;
 
@@ -288,6 +298,23 @@ public class ItemService {
                 .collect(Collectors.toSet());
     }
 
+    @Transactional
+    public void deleteItem(Long itemId, Long userId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));
+        if (!item.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("You can only delete your own items");
+        }
+        if (item.getStatus() == ItemStatus.CLAIMED) {
+            throw new IllegalArgumentException("Cannot delete an item that has already been claimed");
+        }
+        notificationRepository.deleteByRelatedItemId(itemId);
+        notificationRepository.deleteByMatchItemId(itemId);
+        matchRepository.deleteByLostItemIdOrFoundItemId(itemId, itemId);
+        userHistoryRepository.deleteByItemId(itemId);
+        itemRepository.deleteById(itemId);
+    }
+
     @Transactional(readOnly = true)
     public List<ItemResponse> getItemsByUser(Long userId) {
         return itemRepository.findByUserIdOrderByDatePostedDesc(userId)
@@ -297,6 +324,7 @@ public class ItemService {
     }
 
     public ItemResponse toResponse(Item item) {
+        boolean pub = item.isPublic();
         return ItemResponse.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -308,13 +336,14 @@ public class ItemService {
                 .itemType(item.getItemType() != null ? item.getItemType().name() : null)
                 .datePosted(item.getDatePosted())
                 .reporterId(item.getUser() != null ? item.getUser().getId() : null)
-                .reporterName(item.getUser() != null ? item.getUser().getName() : null)
-                .reporterEmail(item.getUser() != null ? item.getUser().getEmail() : null)
+                .reporterName(pub && item.getUser() != null ? item.getUser().getName() : null)
+                .reporterEmail(pub && item.getUser() != null ? item.getUser().getEmail() : null)
                 .claimantId(item.getClaimantId())
                 .claimantName(item.getClaimantId() != null
                         ? userRepository.findById(item.getClaimantId())
                                 .map(User::getName).orElse(null)
                         : null)
+                .isPublic(pub)
                 .build();
     }
 }

@@ -36,6 +36,7 @@ export default function ItemCard({ item: initialItem }) {
     itemType,
     claimantId,
     claimantName,
+    isPublic,
   } = item
 
   const rawName = name || 'Unknown Item'
@@ -56,18 +57,14 @@ export default function ItemCard({ item: initialItem }) {
   }
 
   const isClaimedByMe = isClaimed && user && String(user.id) === String(claimantId)
+  const isAnonymous = isPublic === false && !isOwnItem
 
-  const headerLabel = isClaimed && isClaimedByMe
-    ? 'You claimed this item'
-    : isClaimed
-    ? `${claimantName || 'Someone'} claimed this item`
-    : isOwnItem && isFound
-    ? 'You found this item'
-    : isOwnItem && !isFound
-    ? "You're searching for"
-    : isFound
-    ? `${reporterName || 'Someone'} found item`
-    : `${reporterName || 'Someone'} is searching for`
+  const headerTitle = isFound ? 'Found Item' : 'Lost Item'
+  const byName = isOwnItem
+    ? 'you'
+    : isAnonymous
+    ? 'anonymous'
+    : (reporterName || 'Unknown')
 
   const showChat = isAuthenticated && !isOwnItem && !isClaimed
   const showClaim = isAuthenticated && !isOwnItem && isFound && !isClaimed && !item.claimantId
@@ -103,10 +100,10 @@ export default function ItemCard({ item: initialItem }) {
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 truncate">{headerLabel}</p>
-          {datePosted && (
-            <p className="text-[10px] text-gray-400">Posted at {formatDate(datePosted)}</p>
-          )}
+          <p className="text-xs font-semibold text-gray-800 truncate">{headerTitle}</p>
+          <p className="text-[10px] text-gray-400 truncate">
+            Posted at {formatDate(datePosted)} by {byName}
+          </p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); navigate(`/items/${id}`) }}
@@ -155,7 +152,7 @@ export default function ItemCard({ item: initialItem }) {
           </h3>
           {showChat && (
             <button
-              onClick={(e) => { e.stopPropagation(); navigate(`/chat/${reporterId}`) }}
+              onClick={(e) => { e.stopPropagation(); navigate(`/chat/${reporterId}${isAnonymous ? '?anonymous=true' : ''}`) }}
               className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-white rounded-full whitespace-nowrap hover:opacity-90 transition-opacity"
               style={{ backgroundColor: '#03045E' }}
             >

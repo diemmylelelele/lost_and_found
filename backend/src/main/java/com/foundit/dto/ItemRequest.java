@@ -16,4 +16,6 @@ public class ItemRequest {
     private String locationFound;
 
     private String imageUrl;
+
+    private boolean isPublic = true;
 }

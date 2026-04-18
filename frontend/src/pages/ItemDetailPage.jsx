@@ -114,7 +114,7 @@ export default function ItemDetailPage() {
     <div className="flex flex-col bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-white py-3">
+      <div className="bg-gray-50 py-3">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
           <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-1.5 bg-white flex-shrink-0" style={{ width: '280px' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
@@ -152,7 +152,7 @@ export default function ItemDetailPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-10">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-10 bg-gray-50">
         <div className="flex gap-10 items-start">
 
           {/* Left — image */}
@@ -209,21 +209,18 @@ export default function ItemDetailPage() {
             )}
 
             {/* Feedback messages */}
-            {successMsg && (
-              <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">{successMsg}</div>
-            )}
             {error && (
               <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
             )}
 
             {/* Action buttons — below description */}
             {isClaimed ? (
-              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
+              <div className="p-3 rounded-lg text-sm text-center font-medium" style={{ backgroundColor: '#FEF3C7', color: '#F5A623' }}>
                 This item has been claimed
               </div>
             ) : isOwner && hasPendingClaim ? (
               <div className="flex flex-col gap-3">
-                <div className="p-3 bg-blue-50 text-blue-700 rounded-lg text-sm text-center">
+                <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-sm text-center">
                   There is a high chance this item belongs to the claimer. Verify to confirm or chat to discuss.
                 </div>
                 <div className="flex justify-center gap-4">

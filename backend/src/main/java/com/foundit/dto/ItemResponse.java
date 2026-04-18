@@ -1,5 +1,6 @@
 package com.foundit.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,6 @@ public class ItemResponse {
     private String reporterEmail;
     private Long claimantId;
     private String claimantName;
+    @JsonProperty("isPublic")
+    private boolean isPublic;
 }

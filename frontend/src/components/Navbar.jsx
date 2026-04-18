@@ -43,6 +43,17 @@ export default function Navbar() {
       .catch(() => {})
   }, [notifOpen, isAuthenticated])
 
+  // Poll every 15s to keep badge count up to date
+  useEffect(() => {
+    if (!isAuthenticated) return
+    const interval = setInterval(() => {
+      getNotifications()
+        .then(res => setNotifications(res.data || []))
+        .catch(() => {})
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [isAuthenticated])
+
   // WebSocket — listen for real-time notifications
   useEffect(() => {
     if (!isAuthenticated) return

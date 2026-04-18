@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, Camera, X, Eye, EyeOff } from 'lucide-react'
+import { ChevronDown, Camera, X, Eye, EyeOff, Trash2 } from 'lucide-react'
 import { getProfile, updateProfile, changePassword } from '../api/users'
-import { getMyItems } from '../api/items'
+import { getMyItems, deleteItem } from '../api/items'
 import { useAuth } from '../context/AuthContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 import api from '../api/axios'
@@ -149,6 +149,20 @@ export default function ProfilePage() {
     }
   }
 
+  const handleDelete = async (e, itemId) => {
+    e.stopPropagation()
+    if (!window.confirm('Are you sure you want to remove this item?')) return
+    try {
+      await deleteItem(itemId)
+      setMyItems(prev => prev.filter(i => i.id !== itemId))
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || ''
+      if (msg.toLowerCase().includes('claimed')) {
+        alert('This item has already been claimed and cannot be deleted.')
+      }
+    }
+  }
+
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -238,13 +252,21 @@ export default function ProfilePage() {
                   <div
                     key={item.id}
                     onClick={() => navigate(`/items/${item.id}`)}
-                    className="py-4 cursor-pointer hover:bg-gray-50 px-2 -mx-2 transition-colors"
+                    className="py-4 cursor-pointer hover:bg-gray-50 px-2 -mx-2 transition-colors flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                      <StatusBadge item={item} />
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                        <StatusBadge item={item} />
+                      </div>
+                      <p className="text-xs text-gray-400">Updated on {formatDate(item.datePosted)}</p>
                     </div>
-                    <p className="text-xs text-gray-400">Updated on {formatDate(item.datePosted)}</p>
+                    <button
+                      onClick={(e) => handleDelete(e, item.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))
               )}
@@ -354,7 +376,7 @@ export default function ProfilePage() {
               onClick={handleSave}
               disabled={saving}
               className="w-full py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#03045E' }}
+              style={{ backgroundColor: '#F5A623' }}
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>

@@ -19,4 +19,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByFoundItemId(Long foundItemId);
 
     boolean existsByLostItemAndFoundItem(Item lost, Item found);
+
+    void deleteByLostItemIdOrFoundItemId(Long lostItemId, Long foundItemId);
 }

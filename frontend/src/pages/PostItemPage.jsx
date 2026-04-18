@@ -73,6 +73,7 @@ export default function PostItemPage() {
         category: form.category,
         locationFound: form.locationFound,
         imageUrl,
+        isPublic: form.isPublic !== 'No',
       })
       const item = res.data || res
       navigate(`/items/${item.id}`)

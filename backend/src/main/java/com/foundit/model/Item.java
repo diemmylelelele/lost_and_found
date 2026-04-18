@@ -44,4 +44,11 @@ public class Item {
     private String imageUrl;
 
     private Long claimantId;
+
+    @Column(name = "is_public")
+    private Boolean isPublic;
+
+    public boolean isPublic() {
+        return isPublic == null || isPublic;
+    }
 }
