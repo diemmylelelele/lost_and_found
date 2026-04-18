@@ -69,11 +69,11 @@ export default function HomePage() {
 
         {/* Filter pills — inside a bordered rounded container */}
         <div className="flex-1 flex justify-end">
-        <div className="border border-gray-300 rounded-full px-5 py-3 flex items-center gap-4">
+        <div className="border border-gray-200 rounded-full px-5 py-3 flex items-center gap-4">
           {FILTER_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className="flex items-center gap-1.5 text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors select-none"
+              className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer hover:text-gray-600 transition-colors select-none "
             >
               <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0`}
                 style={activeFilter === opt.value
