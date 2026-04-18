@@ -170,7 +170,7 @@ export default function Navbar() {
                     </div>
 
                     {/* Notification list */}
-                    <div className="max-h-80 overflow-y-auto">
+                    <div className="max-h-[550px] overflow-y-auto">
                       {displayed.length === 0 ? (
                         <div className="flex flex-col items-center py-8 text-center px-4">
                           <Bell size={28} className="text-gray-200 mb-2" />

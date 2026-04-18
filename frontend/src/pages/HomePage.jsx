@@ -50,7 +50,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-white py-3">
+      <div className="bg-gray-50 py-3 ">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
 
         {/* Search bar — wide left side */}
