@@ -50,11 +50,11 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-gray-50 py-3 ">
+      <div className="bg-gray-50 py-5 ">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
 
         {/* Search bar — wide left side */}
-        <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-1.5 bg-white" style={{ width: '280px' }}>
+        <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2.5 bg-white" style={{ width: '280px' }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
@@ -69,7 +69,7 @@ export default function HomePage() {
 
         {/* Filter pills — inside a bordered rounded container */}
         <div className="flex-1 flex justify-end">
-        <div className="border border-gray-300 rounded-full px-5 py-2 flex items-center gap-4">
+        <div className="border border-gray-300 rounded-full px-5 py-3 flex items-center gap-4">
           {FILTER_OPTIONS.map((opt) => (
             <label
               key={opt.value}
@@ -100,7 +100,7 @@ export default function HomePage() {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 px-6 py-6 bg-gray-50">
+      <main className="flex-1 px-6 py-3 bg-gray-50">
         {loading ? (
           <div className="flex justify-center py-16">
             <LoadingSpinner />
