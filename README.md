@@ -39,6 +39,7 @@ https://github.com/diemmylelelele/lost_and_found.git
 | Java JDK | 21 |
 | Node.js | 18 |
 | PostgreSQL | 14 |
+|Maven|http://maven.apache.org/install.html|
 
 ### 1. Database Setup
 
