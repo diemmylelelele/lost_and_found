@@ -148,11 +148,10 @@ export default function ClaimVerificationPage() {
   const labelCls = 'block text-sm text-gray-700 mb-2'
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-10 pb-20 px-6">
+    <div className="bg-gray-50 flex items-start justify-center pt-0 pb-10 px-6">
       <div className="w-full max-w-7xl">
 
-        {/* Card */}
-        <div className="border border-gray-200 rounded-3xl bg-white px-10 pt-8 pb-10 relative">
+        <div className="px-10 pt-8 pb-10">
           <p className="text-center text-base font-medium mb-1 text-gray-800">
             Fill this form to verify your claim
           </p>

@@ -4,6 +4,16 @@ import { getItem, claimSimple, approveClaim } from '../api/items'
 import { useAuth } from '../context/AuthContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 
+const FILTER_OPTIONS = [
+  { label: 'All', value: '' },
+  { label: 'Student card', value: 'Student card' },
+  { label: 'Key', value: 'Key' },
+  { label: 'Water bottles', value: 'Water bottles' },
+  { label: 'Helmet', value: 'Helmet' },
+  { label: 'Chargers', value: 'Chargers' },
+  { label: 'Clothes', value: 'Clothes' },
+]
+
 const VALUABLE_KEYWORDS = [
   'phone', 'laptop', 'wallet', 'smartwatch', 'tablet', 'airpod',
   'ipad', 'macbook', 'iphone', 'samsung', 'watch', 'camera',
@@ -15,15 +25,6 @@ function isValuableItem(name) {
   return VALUABLE_KEYWORDS.some(k => lower.includes(k))
 }
 
-const FILTER_OPTIONS = [
-  { label: 'All', value: '' },
-  { label: 'Student card', value: 'Student card' },
-  { label: 'Key', value: 'Key' },
-  { label: 'Water bottles', value: 'Water bottles' },
-  { label: 'Helmet', value: 'Helmet' },
-  { label: 'Chargers', value: 'Chargers' },
-  { label: 'Clothes', value: 'Clothes' },
-]
 
 export default function ItemDetailPage() {
   const { id } = useParams()
@@ -110,12 +111,11 @@ export default function ItemDetailPage() {
   const hidePrivateDetails = valuable && isFound && !isOwner && !isClaimed
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="flex flex-col bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-white border-b border-gray-100 py-3">
+      <div className="bg-white py-3">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
-          {/* Search */}
           <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-1.5 bg-white flex-shrink-0" style={{ width: '280px' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -123,19 +123,14 @@ export default function ItemDetailPage() {
             <input
               type="text"
               placeholder="Search"
-              className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
+              className="text-sm outline-none text-gray-400 placeholder-gray-400 w-full bg-transparent"
               onKeyDown={e => { if (e.key === 'Enter') navigate(`/?q=${e.target.value}`) }}
             />
           </div>
-
-          {/* Filter pills */}
           <div className="flex-1 flex justify-end">
             <div className="border border-gray-300 rounded-full px-5 py-2 flex items-center gap-4">
               {FILTER_OPTIONS.map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex items-center gap-1.5 text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors select-none"
-                >
+                <label key={opt.value} className="flex items-center gap-1.5 text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors select-none">
                   <span
                     className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
                     style={activeFilter === opt.value ? { borderColor: '#F5A623' } : { borderColor: '#9ca3af' }}
@@ -146,7 +141,7 @@ export default function ItemDetailPage() {
                   </span>
                   <input type="radio" name="detail-filter" className="hidden"
                     checked={activeFilter === opt.value}
-                    onChange={() => { setActiveFilter(opt.value); if (opt.value === '') navigate('/') }}
+                    onChange={() => { setActiveFilter(opt.value); navigate(`/?category=${opt.value}`) }}
                   />
                   <span className="whitespace-nowrap">{opt.label}</span>
                 </label>
@@ -157,7 +152,7 @@ export default function ItemDetailPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pb-10">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-10">
         <div className="flex gap-10 items-start">
 
           {/* Left — image */}
@@ -186,8 +181,7 @@ export default function ItemDetailPage() {
           {/* Right — details */}
           <div className="flex-1 flex flex-col pt-2">
             <h1
-              className="text-4xl font-bold mb-2 leading-tight"
-              style={{ color: '#03045E' }}
+              className="text-4xl font-bold mb-2 leading-tight text-gray-900"
             >
               {item.name}
             </h1>
@@ -196,9 +190,9 @@ export default function ItemDetailPage() {
               <p className="text-sm text-gray-500 mb-5">{item.locationFound}</p>
             )}
 
-            {/* Description box — hidden for valuable items from non-owners */}
+            {/* Description box */}
             {!hidePrivateDetails && (
-              <div className="border border-gray-300 rounded-sm p-4 mb-8 min-h-[200px]">
+              <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[200px]">
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {item.description || ''}
                 </p>
@@ -206,8 +200,8 @@ export default function ItemDetailPage() {
             )}
 
             {hidePrivateDetails && (
-              <div className="border border-amber-200 bg-amber-50 rounded-sm p-4 mb-8 min-h-[120px] flex items-center justify-center">
-                <p className="text-sm text-amber-700 text-center leading-relaxed">
+              <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[200px] flex items-center justify-center">
+                <p className="text-sm text-gray-400 text-center leading-relaxed">
                   This is a valuable item. Description and image are hidden.<br/>
                   Submit a claim to verify ownership.
                 </p>
@@ -222,29 +216,28 @@ export default function ItemDetailPage() {
               <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
             )}
 
-            {/* Action buttons */}
+            {/* Action buttons — below description */}
             {isClaimed ? (
               <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm text-center font-medium">
                 This item has been claimed
               </div>
             ) : isOwner && hasPendingClaim ? (
-              /* Finder sees Verify + Chat when claimer has requested */
               <div className="flex flex-col gap-3">
                 <div className="p-3 bg-blue-50 text-blue-700 rounded-lg text-sm text-center">
                   There is a high chance this item belongs to the claimer. Verify to confirm or chat to discuss.
                 </div>
-                <div className="flex justify-center gap-6">
+                <div className="flex justify-center gap-4">
                   <button
                     onClick={handleApproveClaim}
                     disabled={actioning}
-                    className="w-44 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                    className="w-36 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: '#03045E' }}
                   >
                     {actioning ? 'Verifying...' : 'Verify'}
                   </button>
                   <button
                     onClick={() => navigate(`/chat/${item.claimantId}`)}
-                    className="w-44 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                    className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: '#F5A623' }}
                   >
                     Chat
@@ -256,52 +249,49 @@ export default function ItemDetailPage() {
                 This is your posted item
               </div>
             ) : showVerifyClaimBtn ? (
-              /* Valuable item — go to verification form */
-              <div className="flex justify-center gap-6">
+              <div className="flex justify-center gap-4">
                 <button
                   onClick={() => navigate(`/claim/${id}`)}
-                  className="w-44 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#03045E' }}
                 >
                   Verify Claim
                 </button>
                 <button
                   onClick={handleChat}
-                  className="w-44 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#F5A623' }}
                 >
                   Chat
                 </button>
               </div>
             ) : showSimpleClaimBtn ? (
-              /* Non-valuable item — claimer sends notification */
-              <div className="flex justify-center gap-6">
+              <div className="flex justify-center gap-4">
                 <button
                   onClick={handleSimpleClaim}
                   disabled={actioning}
-                  className="w-44 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  className="w-36 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#03045E' }}
                 >
                   {actioning ? 'Sending...' : 'Claim'}
                 </button>
                 <button
                   onClick={handleChat}
-                  className="w-44 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#F5A623' }}
                 >
                   Chat
                 </button>
               </div>
             ) : !isOwner && item.claimantId && !isClaimed ? (
-              /* Claim already requested by someone */
               <div className="p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm text-center">
                 A claim request is pending for this item
               </div>
             ) : (
-              <div className="flex justify-center gap-6">
+              <div className="flex justify-center gap-4">
                 <button
                   onClick={handleChat}
-                  className="w-44 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#F5A623' }}
                 >
                   Chat

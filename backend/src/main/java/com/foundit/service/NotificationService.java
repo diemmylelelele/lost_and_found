@@ -80,7 +80,7 @@ public class NotificationService {
     public void createClaimRequestNotification(User finder, Long itemId, String claimerName) {
         Notification notification = Notification.builder()
                 .user(finder)
-                .message(claimerName + " wants to claim your found item. Tap to verify.")
+                .message(claimerName + " want to claim this item.")
                 .relatedItemId(itemId)
                 .status(NotificationStatus.UNREAD)
                 .build();

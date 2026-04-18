@@ -21,6 +21,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
            "LOWER(i.description) LIKE LOWER(CONCAT('%', :kw, '%')))")
     List<Item> searchByKeyword(@Param("kw") String keyword, @Param("claimed") ItemStatus claimed);
 
+    List<Item> findAllByOrderByDatePostedDesc();
+
     List<Item> findByUserIdOrderByDatePostedDesc(Long userId);
 
     List<Item> findByItemTypeAndStatusNot(ItemStatus itemType, ItemStatus excludeStatus);

@@ -80,34 +80,48 @@ public class ItemService {
         List<Item> items;
 
         if (StringUtils.hasText(keyword)) {
-            items = itemRepository.searchByKeyword(keyword.trim(), ItemStatus.CLAIMED);
+            items = itemRepository.findAll().stream()
+                    .filter(i -> i.getName() != null && i.getName().toLowerCase().contains(keyword.trim().toLowerCase())
+                            || i.getDescription() != null && i.getDescription().toLowerCase().contains(keyword.trim().toLowerCase()))
+                    .sorted((a, b) -> b.getDatePosted().compareTo(a.getDatePosted()))
+                    .collect(Collectors.toList());
         } else if (StringUtils.hasText(status) && StringUtils.hasText(category)) {
             try {
                 ItemStatus itemStatus = ItemStatus.valueOf(status.toUpperCase());
                 items = itemRepository.findByStatusAndCategoryIgnoreCaseOrderByDatePostedDesc(
                         itemStatus, category.trim());
             } catch (IllegalArgumentException e) {
-                items = itemRepository.findByStatusNotOrderByDatePostedDesc(ItemStatus.CLAIMED);
+                items = itemRepository.findAllByOrderByDatePostedDesc();
             }
         } else if (StringUtils.hasText(status)) {
             try {
                 ItemStatus itemStatus = ItemStatus.valueOf(status.toUpperCase());
-                items = itemRepository.findByStatusAndCategoryIgnoreCaseOrderByDatePostedDesc(
-                        itemStatus, "");
-                if (items.isEmpty()) {
-                    items = itemRepository.findAll().stream()
-                            .filter(i -> i.getStatus() == itemStatus)
-                            .sorted((a, b) -> b.getDatePosted().compareTo(a.getDatePosted()))
-                            .collect(Collectors.toList());
-                }
+                items = itemRepository.findAll().stream()
+                        .filter(i -> i.getStatus() == itemStatus)
+                        .sorted((a, b) -> b.getDatePosted().compareTo(a.getDatePosted()))
+                        .collect(Collectors.toList());
             } catch (IllegalArgumentException e) {
-                items = itemRepository.findByStatusNotOrderByDatePostedDesc(ItemStatus.CLAIMED);
+                items = itemRepository.findAllByOrderByDatePostedDesc();
             }
+        } else if (StringUtils.hasText(category)) {
+            final String[] words = category.trim().toLowerCase().split("\\s+");
+            items = itemRepository.findAllByOrderByDatePostedDesc().stream()
+                    .filter(i -> i.getName() != null && Arrays.stream(words)
+                            .anyMatch(w -> i.getName().toLowerCase().contains(w)))
+                    .collect(Collectors.toList());
         } else {
-            items = itemRepository.findByStatusNotOrderByDatePostedDesc(ItemStatus.CLAIMED);
+            items = itemRepository.findAllByOrderByDatePostedDesc();
         }
 
-        return items.stream().map(this::toResponse).collect(Collectors.toList());
+        return items.stream()
+                .sorted((a, b) -> {
+                    boolean aClaimed = a.getStatus() == ItemStatus.CLAIMED;
+                    boolean bClaimed = b.getStatus() == ItemStatus.CLAIMED;
+                    if (aClaimed != bClaimed) return aClaimed ? 1 : -1;
+                    return b.getDatePosted().compareTo(a.getDatePosted());
+                })
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -297,6 +311,10 @@ public class ItemService {
                 .reporterName(item.getUser() != null ? item.getUser().getName() : null)
                 .reporterEmail(item.getUser() != null ? item.getUser().getEmail() : null)
                 .claimantId(item.getClaimantId())
+                .claimantName(item.getClaimantId() != null
+                        ? userRepository.findById(item.getClaimantId())
+                                .map(User::getName).orElse(null)
+                        : null)
                 .build();
     }
 }

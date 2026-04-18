@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Package, MoreVertical } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { claimSimple } from '../api/items'
 
 const VALUABLE_KEYWORDS = [
   'phone', 'laptop', 'wallet', 'smartwatch', 'tablet', 'airpod',
@@ -13,9 +15,11 @@ function isValuableItem(name) {
   return VALUABLE_KEYWORDS.some(k => lower.includes(k))
 }
 
-export default function ItemCard({ item }) {
+export default function ItemCard({ item: initialItem }) {
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
+  const [item, setItem] = useState(initialItem)
+  const [claiming, setClaiming] = useState(false)
 
   if (!item) return null
 
@@ -30,6 +34,8 @@ export default function ItemCard({ item }) {
     reporterId,
     datePosted,
     itemType,
+    claimantId,
+    claimantName,
   } = item
 
   const rawName = name || 'Unknown Item'
@@ -39,26 +45,22 @@ export default function ItemCard({ item }) {
   const isOwnItem = user && (String(reporterId) === String(user.id))
   const valuable = isValuableItem(name)
 
-  // For valuable found items: hide image and description from non-owners
   const hidePrivateDetails = valuable && isFound && !isOwnItem && !isClaimed
 
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
     try {
       const d = new Date(dateStr)
-      return d.toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'numeric',
-        year: 'numeric',
-      })
-    } catch {
-      return ''
-    }
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' })
+    } catch { return '' }
   }
 
-  // Header label
-  const headerLabel = isClaimed
-    ? 'Claimed Item'
+  const isClaimedByMe = isClaimed && user && String(user.id) === String(claimantId)
+
+  const headerLabel = isClaimed && isClaimedByMe
+    ? 'You claimed this item'
+    : isClaimed
+    ? `${claimantName || 'Someone'} claimed this item`
     : isOwnItem && isFound
     ? 'You found this item'
     : isOwnItem && !isFound
@@ -67,17 +69,28 @@ export default function ItemCard({ item }) {
     ? `${reporterName || 'Someone'} found item`
     : `${reporterName || 'Someone'} is searching for`
 
-  // Show chat button only for non-own items
   const showChat = isAuthenticated && !isOwnItem && !isClaimed
+  const showClaim = isAuthenticated && !isOwnItem && isFound && !isClaimed && !item.claimantId
 
-  // Show claim button only for found items viewed by non-owners
-  const showClaim = isAuthenticated && !isOwnItem && isFound && !isClaimed
-
-  const handleClaimClick = (e) => {
+  const handleClaimClick = async (e) => {
     e.stopPropagation()
     if (!isAuthenticated) { navigate('/login'); return }
-    navigate(`/claim/${id}`)
+    if (valuable) {
+      navigate(`/claim/${id}`)
+      return
+    }
+    try {
+      setClaiming(true)
+      const res = await claimSimple(id)
+      setItem(res.data || res)
+    } catch {
+      // silently fail — user can retry from detail page
+    } finally {
+      setClaiming(false)
+    }
   }
+
+  const hasPendingClaim = item.claimantId && !isClaimed
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
@@ -90,9 +103,7 @@ export default function ItemCard({ item }) {
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 truncate">
-            {headerLabel}
-          </p>
+          <p className="text-xs font-semibold text-gray-800 truncate">{headerLabel}</p>
           {datePosted && (
             <p className="text-[10px] text-gray-400">Posted at {formatDate(datePosted)}</p>
           )}
@@ -105,13 +116,9 @@ export default function ItemCard({ item }) {
         </button>
       </div>
 
-      {/* Image — hidden for valuable found items (non-owners) */}
+      {/* Image */}
       {!hidePrivateDetails ? (
-        <div
-          className="bg-gray-100 cursor-pointer"
-          style={{ height: '200px' }}
-          onClick={() => navigate(`/items/${id}`)}
-        >
+        <div className="bg-gray-100 cursor-pointer" style={{ height: '200px' }} onClick={() => navigate(`/items/${id}`)}>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -123,23 +130,15 @@ export default function ItemCard({ item }) {
               }}
             />
           ) : null}
-          <div
-            className={`w-full h-full flex flex-col items-center justify-center bg-gray-100 ${imageUrl ? 'hidden' : 'flex'}`}
-          >
+          <div className={`w-full h-full flex flex-col items-center justify-center bg-gray-100 ${imageUrl ? 'hidden' : 'flex'}`}>
             <Package size={36} className="text-gray-300" />
             <span className="text-xs text-gray-400 mt-1">No image</span>
           </div>
         </div>
       ) : (
-        <div
-          className="bg-gray-100 cursor-pointer flex flex-col items-center justify-center"
-          style={{ height: '200px' }}
-          onClick={() => navigate(`/items/${id}`)}
-        >
+        <div className="bg-gray-100 cursor-pointer flex flex-col items-center justify-center" style={{ height: '200px' }} onClick={() => navigate(`/items/${id}`)}>
           <Package size={36} className="text-gray-300" />
-          <span className="text-xs text-gray-400 mt-2 px-4 text-center">
-            Image hidden for valuable item
-          </span>
+          <span className="text-xs text-gray-400 mt-2 px-4 text-center">Image hidden for valuable item</span>
         </div>
       )}
 
@@ -173,12 +172,11 @@ export default function ItemCard({ item }) {
           </div>
         )}
 
-        {/* Description — hidden for valuable found items (non-owners) */}
+        {/* Description */}
         {description && !hidePrivateDetails && (
           <p className="text-xs text-gray-500 line-clamp-2">{description}</p>
         )}
 
-        {/* Valuable badge */}
         {hidePrivateDetails && (
           <p className="text-xs text-gray-500">Valuable item — verify to claim</p>
         )}
@@ -186,17 +184,22 @@ export default function ItemCard({ item }) {
         {/* Action button */}
         <div className="flex justify-center mt-auto pt-2">
           {isClaimed ? (
-            <div className="px-8 py-2 text-xs font-semibold text-center text-green-600 bg-green-50 rounded-full border border-green-100">
+            <div className="px-6 py-2 text-sm font-semibold text-center rounded-full border" style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
               Claimed
             </div>
           ) : isOwnItem ? null
-          : showClaim ? (
+          : hasPendingClaim && !isOwnItem ? (
+            <div className="px-6 py-2 text-xs font-semibold text-center text-yellow-600 bg-yellow-50 rounded-full border border-yellow-100">
+              Claim pending
+            </div>
+          ) : showClaim ? (
             <button
               onClick={handleClaimClick}
-              className="px-6 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity"
+              disabled={claiming}
+              className="px-6 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
               style={{ backgroundColor: '#F5A623' }}
             >
-              Claim
+              {claiming ? 'Sending...' : 'Claim'}
             </button>
           ) : null}
         </div>

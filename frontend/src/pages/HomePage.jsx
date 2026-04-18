@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { getItems } from '../api/items'
 import ItemCard from '../components/ItemCard'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -14,11 +15,12 @@ const FILTER_OPTIONS = [
 ]
 
 export default function HomePage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [allItems, setAllItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const [activeFilter, setActiveFilter] = useState('')
+  const [activeFilter, setActiveFilter] = useState(searchParams.get('category') || '')
 
   const fetchItems = async (cat) => {
     try {
@@ -48,7 +50,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-white border-b border-gray-100 py-3">
+      <div className="bg-white py-3">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
 
         {/* Search bar — wide left side */}
@@ -87,7 +89,7 @@ export default function HomePage() {
                 name="filter"
                 className="hidden"
                 checked={activeFilter === opt.value}
-                onChange={() => setActiveFilter(opt.value)}
+                onChange={() => { setActiveFilter(opt.value); setSearchParams(opt.value ? { category: opt.value } : {}) }}
               />
               <span className="whitespace-nowrap">{opt.label}</span>
             </label>

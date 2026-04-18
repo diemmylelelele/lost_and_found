@@ -26,4 +26,5 @@ public class ItemResponse {
     private String reporterName;
     private String reporterEmail;
     private Long claimantId;
+    private String claimantName;
 }
