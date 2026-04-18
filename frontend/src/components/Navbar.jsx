@@ -102,10 +102,20 @@ export default function Navbar() {
       } catch { /* ignore */ }
     }
     setNotifOpen(false)
-    if (n.chatSenderId) navigate(`/chat/${n.chatSenderId}`)
-    else if (n.relatedItemId) navigate(`/items/${n.relatedItemId}`)
-    else if (n.lostItemId) navigate(`/items/${n.lostItemId}`)
-    else if (n.foundItemId) navigate(`/items/${n.foundItemId}`)
+    if (n.chatSenderId) {
+      navigate(`/chat/${n.chatSenderId}`)
+    } else if (n.relatedItemId) {
+      // Match notification: if navigating to a lost item, pass the found item id so the finder can verify
+      if (n.foundItemId && n.lostItemId && String(n.relatedItemId) === String(n.lostItemId)) {
+        navigate(`/items/${n.relatedItemId}?verifyFoundItem=${n.foundItemId}`)
+      } else {
+        navigate(`/items/${n.relatedItemId}`)
+      }
+    } else if (n.lostItemId) {
+      navigate(`/items/${n.lostItemId}`)
+    } else if (n.foundItemId) {
+      navigate(`/items/${n.foundItemId}`)
+    }
   }
 
   const handleLogout = () => {
@@ -213,7 +223,7 @@ export default function Navbar() {
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-bold text-gray-800">{displayName}</p>
-                              <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{n.message}</p>
+                              <p className="text-xs text-gray-500 line-clamp-3 mt-0.5">{n.message}</p>
                             </div>
 
                             {/* Time + unread dot */}

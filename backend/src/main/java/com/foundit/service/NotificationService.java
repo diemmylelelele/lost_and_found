@@ -50,11 +50,12 @@ public class NotificationService {
     }
 
     @Transactional
-    public Notification createNotification(User user, Match match, String message) {
+    public Notification createNotification(User user, Match match, String message, Long relatedItemId) {
         Notification notification = Notification.builder()
                 .user(user)
                 .match(match)
                 .message(message)
+                .relatedItemId(relatedItemId)
                 .status(NotificationStatus.UNREAD)
                 .build();
         Notification saved = notificationRepository.save(notification);

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MatchingService {
 
-    private static final float MATCH_THRESHOLD = 0.50f;
+    private static final float MATCH_THRESHOLD = 0.30f;
     private static final Set<String> STOP_WORDS = Set.of(
             "the", "a", "an", "is", "it", "this", "that", "was", "are",
             "has", "have", "had", "for", "and", "but", "or", "not", "with");
@@ -70,24 +70,20 @@ public class MatchingService {
                 log.info("Match created: lost={}, found={}, score={}",
                         lostItem.getId(), foundItem.getId(), score);
 
-                // Notify the other item's owner
-                Item otherItem = newItem.getId().equals(lostItem.getId()) ? foundItem : lostItem;
-                String message = String.format(
-                        "Potential match found! Your %s item '%s' may match '%s'.",
-                        otherItem.getItemType().name().toLowerCase(),
-                        otherItem.getName(),
-                        newItem.getName());
+                // Notify found item poster → navigate them to the lost item
+                String msgForFinder = String.format(
+                        "Potential match found! Your posted found item '%s' has a high chance to match with %s's posted lost item.",
+                        foundItem.getName(),
+                        lostItem.getUser().getName());
+                notificationService.createNotification(foundItem.getUser(), match, msgForFinder, lostItem.getId());
 
-                notificationService.createNotification(otherItem.getUser(), match, message);
-
-                // Also notify the new item's owner if different user
-                if (!newItem.getUser().getId().equals(otherItem.getUser().getId())) {
-                    String msgForNewOwner = String.format(
-                            "Potential match found! Your %s item '%s' may match '%s'.",
-                            newItem.getItemType().name().toLowerCase(),
-                            newItem.getName(),
-                            otherItem.getName());
-                    notificationService.createNotification(newItem.getUser(), match, msgForNewOwner);
+                // Notify lost item poster → navigate them to the found item
+                if (!lostItem.getUser().getId().equals(foundItem.getUser().getId())) {
+                    String msgForLostPoster = String.format(
+                            "Potential match found! Your posted lost item '%s' has a high chance to match with %s's posted found item.",
+                            lostItem.getName(),
+                            foundItem.getUser().getName());
+                    notificationService.createNotification(lostItem.getUser(), match, msgForLostPoster, foundItem.getId());
                 }
             }
         }
