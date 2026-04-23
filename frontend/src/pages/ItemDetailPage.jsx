@@ -202,7 +202,7 @@ export default function ItemDetailPage() {
 
             <p className="text-xs text-gray-400 mb-2">
               Posted at {item.datePosted ? new Date(item.datePosted).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''}
-              {' '}by {isOwner ? 'you' : (item.isPublic === false ? 'anonymous' : (item.reporterName || 'Unknown'))}
+              {' '}by {isOwner ? 'you' : (item.isPublic === false ? 'Anonymous Member' : (item.reporterName || 'Unknown'))}
             </p>
 
             {item.dateEvent && (

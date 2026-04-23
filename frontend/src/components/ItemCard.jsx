@@ -63,7 +63,7 @@ export default function ItemCard({ item: initialItem }) {
   const byName = isOwnItem
     ? 'you'
     : isAnonymous
-    ? 'anonymous'
+    ? 'Anonymous Member'
     : (reporterName || 'Unknown')
 
   const showChat = isAuthenticated && !isOwnItem && !isClaimed

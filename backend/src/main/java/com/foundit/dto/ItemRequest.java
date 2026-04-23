@@ -1,5 +1,6 @@
 package com.foundit.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -21,5 +22,6 @@ public class ItemRequest {
 
     private LocalDate dateEvent;
 
+    @JsonProperty("isPublic")
     private boolean isPublic = true;
 }

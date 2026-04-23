@@ -26,4 +26,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByUserIdOrderByDatePostedDesc(Long userId);
 
     List<Item> findByItemTypeAndStatusNot(ItemStatus itemType, ItemStatus excludeStatus);
+
+    boolean existsByUserIdAndIsPublicFalse(Long userId);
 }
