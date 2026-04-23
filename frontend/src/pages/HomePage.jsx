@@ -100,7 +100,7 @@ export default function HomePage() {
             <p className="text-sm mt-1">Try adjusting your filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {displayedItems.map((item) => (
               <ItemCard key={item.id} item={item} />
             ))}

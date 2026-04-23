@@ -73,6 +73,7 @@ export default function PostItemPage() {
         category: form.category,
         locationFound: form.locationFound,
         imageUrl,
+        dateEvent: form.date || null,
         isPublic: form.isPublic !== 'No',
       })
       const item = res.data || res
@@ -136,7 +137,7 @@ export default function PostItemPage() {
                   </div>
                 </div>
                 <div>
-                  <label className={labelCls}>Date</label>
+                  <label className={labelCls}>{isFound ? 'Date Found' : 'Date Lost'}</label>
                   <div className="relative">
                     <input
                       name="date"

@@ -3,6 +3,8 @@ package com.foundit.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class ItemRequest {
 
@@ -16,6 +18,8 @@ public class ItemRequest {
     private String locationFound;
 
     private String imageUrl;
+
+    private LocalDate dateEvent;
 
     private boolean isPublic = true;
 }

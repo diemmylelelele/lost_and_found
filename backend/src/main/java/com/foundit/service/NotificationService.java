@@ -78,10 +78,10 @@ public class NotificationService {
     }
 
     @Transactional
-    public void createClaimRequestNotification(User finder, Long itemId, String claimerName) {
+    public void createClaimRequestNotification(User finder, Long itemId, String claimerName, String itemName) {
         Notification notification = Notification.builder()
                 .user(finder)
-                .message(claimerName + " want to claim this item.")
+                .message(claimerName + " want to claim " + itemName + ".")
                 .relatedItemId(itemId)
                 .status(NotificationStatus.UNREAD)
                 .build();

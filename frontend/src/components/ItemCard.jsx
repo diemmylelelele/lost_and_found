@@ -115,7 +115,7 @@ export default function ItemCard({ item: initialItem }) {
 
       {/* Image */}
       {!hidePrivateDetails ? (
-        <div className="bg-gray-100 cursor-pointer" style={{ height: '200px' }} onClick={() => navigate(`/items/${id}`)}>
+        <div className="bg-gray-100 cursor-pointer" style={{ height: '160px' }} onClick={() => navigate(`/items/${id}`)}>
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -133,7 +133,7 @@ export default function ItemCard({ item: initialItem }) {
           </div>
         </div>
       ) : (
-        <div className="bg-gray-100 cursor-pointer flex flex-col items-center justify-center" style={{ height: '200px' }} onClick={() => navigate(`/items/${id}`)}>
+        <div className="bg-gray-100 cursor-pointer flex flex-col items-center justify-center" style={{ height: '160px' }} onClick={() => navigate(`/items/${id}`)}>
           <Package size={36} className="text-gray-300" />
           <span className="text-xs text-gray-400 mt-2 px-4 text-center">Image hidden for valuable item</span>
         </div>

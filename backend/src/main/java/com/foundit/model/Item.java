@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "items")
@@ -44,6 +46,8 @@ public class Item {
     private String imageUrl;
 
     private Long claimantId;
+
+    private LocalDate dateEvent;
 
     @Column(name = "is_public")
     private Boolean isPublic;

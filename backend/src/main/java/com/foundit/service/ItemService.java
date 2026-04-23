@@ -61,6 +61,7 @@ public class ItemService {
                 .imageUrl(req.getImageUrl())
                 .itemType(itemType)
                 .status(itemType)
+                .dateEvent(req.getDateEvent())
                 .isPublic(req.isPublic())
                 .build();
 
@@ -182,7 +183,7 @@ public class ItemService {
         Item saved = itemRepository.save(item);
 
         // Notify the finder (item owner)
-        notificationService.createClaimRequestNotification(item.getUser(), itemId, claimant.getName());
+        notificationService.createClaimRequestNotification(item.getUser(), itemId, claimant.getName(), item.getName());
 
         return toResponse(saved);
     }
@@ -335,6 +336,7 @@ public class ItemService {
                 .status(item.getStatus() != null ? item.getStatus().name() : null)
                 .itemType(item.getItemType() != null ? item.getItemType().name() : null)
                 .datePosted(item.getDatePosted())
+                .dateEvent(item.getDateEvent())
                 .reporterId(item.getUser() != null ? item.getUser().getId() : null)
                 .reporterName(pub && item.getUser() != null ? item.getUser().getName() : null)
                 .reporterEmail(pub && item.getUser() != null ? item.getUser().getEmail() : null)

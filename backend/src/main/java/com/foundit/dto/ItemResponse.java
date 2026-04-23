@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,6 +24,7 @@ public class ItemResponse {
     private String status;
     private String itemType;
     private LocalDateTime datePosted;
+    private LocalDate dateEvent;
     private Long reporterId;
     private String reporterName;
     private String reporterEmail;

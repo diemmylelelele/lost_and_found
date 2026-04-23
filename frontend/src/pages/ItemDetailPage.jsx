@@ -201,6 +201,12 @@ export default function ItemDetailPage() {
               {' '}by {isOwner ? 'you' : (item.isPublic === false ? 'anonymous' : (item.reporterName || 'Unknown'))}
             </p>
 
+            {item.dateEvent && (
+              <p className="text-xs text-gray-500 mb-1">
+                {isFound ? 'Date found' : 'Date lost'}: {new Date(item.dateEvent).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </p>
+            )}
+
             {item.locationFound && (
               <p className="text-sm text-gray-500 mb-5">{item.locationFound}</p>
             )}
@@ -253,8 +259,8 @@ export default function ItemDetailPage() {
                 </div>
               </div>
             ) : isClaimed ? (
-              <div className="p-3 rounded-lg text-sm text-center font-medium" style={{ backgroundColor: '#FEF3C7', color: '#F5A623' }}>
-                This item has been claimed{item.claimantName ? ` by ${item.claimantName}` : ''}
+              <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center font-medium">
+                This item has been claimed by {item.claimantName || 'someone'}
               </div>
             ) : isOwner && hasPendingClaim ? (
               <div className="flex flex-col gap-3">
@@ -280,7 +286,7 @@ export default function ItemDetailPage() {
                 </div>
               </div>
             ) : isOwner ? (
-              <div className="p-3 bg-blue-50 text-blue-700 rounded-lg text-sm text-center">
+              <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
                 This is your posted item
               </div>
             ) : showVerifyClaimBtn ? (
@@ -319,8 +325,8 @@ export default function ItemDetailPage() {
                 </button>
               </div>
             ) : !isOwner && item.claimantId && !isClaimed ? (
-              <div className="p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm text-center">
-                A claim request is pending for this item
+              <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
+                {item.claimantName || 'Someone'} is sending a request to claim this item
               </div>
             ) : (
               <div className="flex justify-center gap-4">
