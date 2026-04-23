@@ -94,7 +94,7 @@ export default function PostItemPage() {
 
         {/* Card */}
         <div className="px-10 pt-8 pb-10">
-          <p className="text-center text-base font-medium mb-6 text-gray-800">
+          <p className="text-left text-base font-medium mb-6 text-gray-800">
             {isFound
               ? 'Fill this form to report the items that you found'
               : 'Fill this form to report the items that you lost'}

@@ -117,8 +117,12 @@ export default function ItemDetailPage() {
   // Owner sees "Verify" + "Chat" when someone has requested/matched a claim
   const hasPendingClaim = isFound && isOwner && item.claimantId && !isClaimed
 
+  const userIsClaimant = user && String(user.id) === String(item.claimantId)
+
   // Valuable found item: non-owner sees "Verify Claim" button that goes to the verification page
-  const showVerifyClaimBtn = valuable && isFound && !isOwner && !isClaimed
+  const showVerifyClaimBtn = valuable && isFound && !isOwner && !isClaimed && !userIsClaimant
+  // Valuable found item: current user already submitted verification
+  const showVerifySubmitted = valuable && isFound && !isOwner && !isClaimed && userIsClaimant
   // Non-valuable found item: non-owner sees "Claim" (sends notification) + "Chat"
   const showSimpleClaimBtn = !valuable && isFound && !isOwner && !isClaimed && !item.claimantId
 
@@ -138,7 +142,7 @@ export default function ItemDetailPage() {
               <button
                 key={opt.value}
                 onClick={() => navigate(opt.value ? `/?type=${opt.value}` : '/')}
-                className="px-4 py-3 rounded-full text-xs font-medium transition-colors text-gray-500 hover:text-gray-700"
+                className="px-4 py-3 rounded-full text-sm font-medium transition-colors text-gray-500 hover:text-gray-700"
               >
                 {opt.label}
               </button>
@@ -259,8 +263,25 @@ export default function ItemDetailPage() {
                 </div>
               </div>
             ) : isClaimed ? (
-              <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center font-medium">
-                This item has been claimed by {item.claimantName || 'someone'}
+              <div className="flex flex-col gap-3">
+                <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center font-medium">
+                  This item has been claimed by {item.claimantName || 'someone'}
+                </div>
+                <div className="flex justify-center gap-4">
+                  <div className="w-36 h-11 rounded-full text-sm font-semibold flex items-center justify-center border cursor-not-allowed"
+                    style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
+                    Claimed
+                  </div>
+                  {!isOwner && (
+                    <button
+                      onClick={handleChat}
+                      className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: '#03045E' }}
+                    >
+                      Chat
+                    </button>
+                  )}
+                </div>
               </div>
             ) : isOwner && hasPendingClaim ? (
               <div className="flex flex-col gap-3">
@@ -288,6 +309,25 @@ export default function ItemDetailPage() {
             ) : isOwner ? (
               <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
                 This is your posted item
+              </div>
+            ) : showVerifySubmitted ? (
+              <div className="flex flex-col gap-3">
+                <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
+                  You submitted the claim verification
+                </div>
+                <div className="flex justify-center gap-4">
+                  <div className="w-36 h-11 rounded-full text-sm font-semibold flex items-center justify-center border cursor-not-allowed"
+                    style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
+                    Claim Pending
+                  </div>
+                  <button
+                    onClick={handleChat}
+                    className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#03045E' }}
+                  >
+                    Chat
+                  </button>
+                </div>
               </div>
             ) : showVerifyClaimBtn ? (
               <div className="flex justify-center gap-4">
