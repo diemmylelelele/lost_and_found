@@ -186,7 +186,7 @@ export default function ItemCard({ item: initialItem }) {
             </div>
           ) : isOwnItem ? null
           : hasPendingClaim && !isOwnItem ? (
-            <div className="px-6 py-2 text-xs font-semibold text-center text-yellow-600 bg-yellow-50 rounded-full border border-yellow-100">
+            <div className="px-6 py-2 text-sm font-semibold text-center rounded-full border" style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
               Claim pending
             </div>
           ) : showClaim ? (

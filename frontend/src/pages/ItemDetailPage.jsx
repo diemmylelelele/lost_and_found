@@ -129,40 +129,35 @@ export default function ItemDetailPage() {
     <div className="flex flex-col bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-gray-50 py-5">
-        <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
-          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2.5 bg-white flex-shrink-0" style={{ width: '280px' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
+      <div className="bg-gray-50 py-4">
+        <div className="max-w-7xl mx-auto px-6 flex items-center gap-3">
+
+          {/* Type filter tabs */}
+          <div className="flex items-center flex-shrink-0 border border-gray-200 rounded-full bg-white overflow-hidden">
+            {[{ label: 'All Items', value: '' }, { label: 'Lost Items', value: 'LOST' }, { label: 'Found Items', value: 'FOUND' }].map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => navigate(opt.value ? `/?type=${opt.value}` : '/')}
+                className="px-4 py-3 rounded-full text-xs font-medium transition-colors text-gray-500 hover:text-gray-700"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search bar */}
+          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '650px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input
               type="text"
-              placeholder="Search"
-              className="text-sm outline-none text-gray-400 placeholder-gray-400 w-full bg-transparent"
+              placeholder="Search for items"
+              className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
               onKeyDown={e => { if (e.key === 'Enter') navigate(`/?q=${e.target.value}`) }}
             />
           </div>
-          <div className="flex-1 flex justify-end">
-            <div className="border border-gray-200 rounded-full px-5 py-3 flex items-center gap-4">
-              {FILTER_OPTIONS.map((opt) => (
-                <label key={opt.value} className="flex items-center gap-1.5 text-sm text-gray-400 cursor-pointer hover:text-gray-600 transition-colors select-none">
-                  <span
-                    className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                    style={activeFilter === opt.value ? { borderColor: '#F5A623' } : { borderColor: '#9ca3af' }}
-                  >
-                    {activeFilter === opt.value && (
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#F5A623' }} />
-                    )}
-                  </span>
-                  <input type="radio" name="detail-filter" className="hidden"
-                    checked={activeFilter === opt.value}
-                    onChange={() => { setActiveFilter(opt.value); navigate(`/?category=${opt.value}`) }}
-                  />
-                  <span className="whitespace-nowrap">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -243,15 +238,15 @@ export default function ItemDetailPage() {
                   <button
                     onClick={handleFinderVerify}
                     disabled={actioning}
-                    className="w-36 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#03045E' }}
+                    className="w-36 h-11 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#F5A623' }}
                   >
                     {actioning ? 'Verifying...' : 'Verify'}
                   </button>
                   <button
                     onClick={handleChat}
-                    className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#F5A623' }}
+                    className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#03045E' }}
                   >
                     Chat
                   </button>
@@ -270,15 +265,15 @@ export default function ItemDetailPage() {
                   <button
                     onClick={handleApproveClaim}
                     disabled={actioning}
-                    className="w-36 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#03045E' }}
+                    className="w-36 h-11 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#F5A623' }}
                   >
                     {actioning ? 'Verifying...' : 'Verify'}
                   </button>
                   <button
                     onClick={() => navigate(`/chat/${item.claimantId}`)}
-                    className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#F5A623' }}
+                    className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#03045E' }}
                   >
                     Chat
                   </button>
@@ -292,15 +287,15 @@ export default function ItemDetailPage() {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => navigate(`/claim/${id}`)}
-                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#03045E' }}
+                  className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#F5A623' }}
                 >
                   Verify Claim
                 </button>
                 <button
                   onClick={handleChat}
-                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#F5A623' }}
+                  className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#03045E' }}
                 >
                   Chat
                 </button>
@@ -310,15 +305,15 @@ export default function ItemDetailPage() {
                 <button
                   onClick={handleSimpleClaim}
                   disabled={actioning}
-                  className="w-36 py-3 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#03045E' }}
+                  className="w-36 h-11 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#F5A623' }}
                 >
                   {actioning ? 'Sending...' : 'Claim'}
                 </button>
                 <button
                   onClick={handleChat}
-                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#F5A623' }}
+                  className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#03045E' }}
                 >
                   Chat
                 </button>
@@ -331,8 +326,8 @@ export default function ItemDetailPage() {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={handleChat}
-                  className="w-36 py-3 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#F5A623' }}
+                  className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#03045E' }}
                 >
                   Chat
                 </button>

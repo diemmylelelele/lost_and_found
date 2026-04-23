@@ -4,14 +4,10 @@ import { getItems } from '../api/items'
 import ItemCard from '../components/ItemCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 
-const FILTER_OPTIONS = [
-  { label: 'All', value: '' },
-  { label: 'Student card', value: 'Student card' },
-  { label: 'Key', value: 'Key' },
-  { label: 'Water bottles', value: 'Water bottles' },
-  { label: 'Helmet', value: 'Helmet' },
-  { label: 'Chargers', value: 'Chargers' },
-  { label: 'Clothes', value: 'Clothes' },
+const TYPE_FILTERS = [
+  { label: 'All Items', value: '' },
+  { label: 'Lost Items', value: 'LOST' },
+  { label: 'Found Items', value: 'FOUND' },
 ]
 
 export default function HomePage() {
@@ -20,13 +16,13 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const [activeFilter, setActiveFilter] = useState(searchParams.get('category') || '')
+  const [typeFilter, setTypeFilter] = useState('')
 
-  const fetchItems = async (cat) => {
+  const fetchItems = async () => {
     try {
       setLoading(true)
       setError('')
-      const res = await getItems({ category: cat })
+      const res = await getItems({})
       setAllItems(res.data || [])
     } catch {
       setError('Failed to load items.')
@@ -36,66 +32,57 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    fetchItems(activeFilter)
-  }, [activeFilter])
+    fetchItems()
+  }, [])
 
   const displayedItems = allItems.filter(item => {
     const q = searchInput.trim().toLowerCase()
-    return !q ||
+    const matchSearch = !q ||
       item.name?.toLowerCase().includes(q) ||
       item.locationFound?.toLowerCase().includes(q)
+    const matchType = !typeFilter || item.itemType === typeFilter
+    return matchSearch && matchType
   })
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
 
       {/* Search + Filter bar */}
-      <div className="bg-gray-50 py-5 ">
-        <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
+      <div className="bg-gray-50 py-4">
+        <div className="max-w-7xl mx-auto px-6 flex items-center gap-3">
 
-        {/* Search bar — wide left side */}
-        <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2.5 bg-white" style={{ width: '280px' }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search"
-            className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
-          />
-        </div>
-
-        {/* Filter pills — inside a bordered rounded container */}
-        <div className="flex-1 flex justify-end">
-        <div className="border border-gray-200 rounded-full px-5 py-3 flex items-center gap-4">
-          {FILTER_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer hover:text-gray-600 transition-colors select-none "
-            >
-              <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0`}
-                style={activeFilter === opt.value
-                  ? { borderColor: '#F5A623' }
-                  : { borderColor: '#9ca3af' }}
+          {/* Type filter tabs */}
+          <div className="flex items-center flex-shrink-0 border border-gray-200 rounded-full bg-white overflow-hidden">
+            {TYPE_FILTERS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setTypeFilter(opt.value)}
+                style={typeFilter === opt.value ? { color: '#EEA40F' } : {}}
+                className={`px-4 py-3 rounded-full text-xs font-medium transition-colors ${
+                  typeFilter === opt.value
+                    ? 'font-semibold'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
               >
-                {activeFilter === opt.value && (
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#F5A623' }} />
-                )}
-              </span>
-              <input
-                type="radio"
-                name="filter"
-                className="hidden"
-                checked={activeFilter === opt.value}
-                onChange={() => { setActiveFilter(opt.value); setSearchParams(opt.value ? { category: opt.value } : {}) }}
-              />
-              <span className="whitespace-nowrap">{opt.label}</span>
-            </label>
-          ))}
-        </div>
-        </div>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search bar */}
+          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '650px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search for items"
+              className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
+            />
+          </div>
+
         </div>
       </div>
 
@@ -120,7 +107,6 @@ export default function HomePage() {
           </div>
         )}
       </main>
-
 
     </div>
   )
