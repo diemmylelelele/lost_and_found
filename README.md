@@ -11,7 +11,7 @@ This project aims to build a platform that allows staff and students within the 
 ---
 
 ## Demo Usage
-This is the link to demo [video](https://youtu.be/L-vK67Z2Nd8?si=iu0jQtp2zdl0lVSX)
+This is the link to demo [video](https://youtu.be/cgAN8niM9D4?si=iUdNlKG_Fw8qLcqH)
 
 ## Completed Features
 
@@ -24,11 +24,13 @@ This is the link to demo [video](https://youtu.be/L-vK67Z2Nd8?si=iu0jQtp2zdl0lVS
 - Real-time user-to-user chat powered by WebSocket
 - Delete posted items with ownership control (users can only delete their own posts, and claimed items - cannot be removed)
 
+## Link GitHub repository
+
+https://github.com/diemmylelelele/lost_and_found.git
+
 ---
 
 ## How to Run the Project
-
-You need **two terminals** open at the same time.
 
 ### Prerequisites
 
@@ -37,6 +39,7 @@ You need **two terminals** open at the same time.
 | Java JDK | 21 |
 | Node.js | 18 |
 | PostgreSQL | 14 |
+|Maven|http://maven.apache.org/install.html|
 
 ### 1. Database Setup
 
