@@ -325,8 +325,27 @@ export default function ItemDetailPage() {
                 </button>
               </div>
             ) : !isOwner && item.claimantId && !isClaimed ? (
-              <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
-                {item.claimantName || 'Someone'} is sending a request to claim this item
+              <div className="flex flex-col gap-3">
+                <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
+                  {user && String(user.id) === String(item.claimantId)
+                    ? 'You are sending a request to claim this item'
+                    : `${item.claimantName || 'Someone'} is sending a request to claim this item`}
+                </div>
+                {user && String(user.id) === String(item.claimantId) && (
+                  <div className="flex justify-center gap-4">
+                    <div className="w-36 h-11 rounded-full text-sm font-semibold flex items-center justify-center border cursor-not-allowed"
+                      style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
+                      Claim Pending
+                    </div>
+                    <button
+                      onClick={handleChat}
+                      className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: '#03045E' }}
+                    >
+                      Chat
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex justify-center gap-4">
