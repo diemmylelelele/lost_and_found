@@ -102,6 +102,7 @@ If you are pulling new changes, some features require manually adding columns to
 
 ```bash
 psql -h localhost -U admin -d founditdb -c "ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS sender_is_anonymous BOOLEAN DEFAULT FALSE;"
+psql -h localhost -U admin -d founditdb -c "ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS related_item_id BIGINT;"
 ```
 
-> `IF NOT EXISTS` ensures the command is safe to run even if the column already exists.
+> `IF NOT EXISTS` ensures the commands are safe to run even if the columns already exist.

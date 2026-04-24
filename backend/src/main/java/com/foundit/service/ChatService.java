@@ -48,8 +48,20 @@ public class ChatService {
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new EntityNotFoundException("Recipient not found"));
 
-        // senderIsAnonymous = true if THIS sender is the anonymous poster
-        boolean senderIsAnonymous = itemRepository.existsByUserIdAndIsPublicFalse(senderId);
+        // Resolve which item this conversation is about
+        Long resolvedItemId = itemId;
+        if (resolvedItemId == null) {
+            List<ChatMessage> withItem = chatMessageRepository.findConversationWithItemId(senderId, recipientId);
+            if (!withItem.isEmpty()) resolvedItemId = withItem.get(0).getRelatedItemId();
+        }
+
+        // senderIsAnonymous = true only if THIS sender posted that specific item anonymously
+        boolean senderIsAnonymous = false;
+        if (resolvedItemId != null) {
+            senderIsAnonymous = itemRepository.findById(resolvedItemId)
+                    .map(item -> item.getUser().getId().equals(senderId) && !item.isPublic())
+                    .orElse(false);
+        }
 
         ChatMessage message = ChatMessage.builder()
                 .sender(sender)
@@ -57,6 +69,7 @@ public class ChatService {
                 .content(content)
                 .read(false)
                 .senderIsAnonymous(senderIsAnonymous)
+                .relatedItemId(resolvedItemId)
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
@@ -94,7 +107,8 @@ public class ChatService {
             ChatMessage lastMsg = conversation.get(conversation.size() - 1);
             List<ChatMessage> unread = chatMessageRepository.findUnreadFrom(userId, partnerId);
 
-            boolean partnerIsAnonymous = itemRepository.existsByUserIdAndIsPublicFalse(partnerId);
+            boolean partnerIsAnonymous = conversation.stream()
+                    .anyMatch(m -> m.getSender().getId().equals(partnerId) && m.isSenderIsAnonymous());
             String partnerDisplayName = partnerIsAnonymous ? "Anonymous Member" : partner.getName();
             summaries.add(ConversationSummary.builder()
                     .partnerId(partnerId)

@@ -35,4 +35,6 @@ public class ChatMessage {
     private boolean read;
 
     private boolean senderIsAnonymous;
+
+    private Long relatedItemId;
 }

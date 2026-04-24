@@ -28,4 +28,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
     @Query("SELECT m FROM ChatMessage m WHERE m.sender.id = :senderId AND m.recipient.id = :recipientId ORDER BY m.sentAt DESC")
     List<ChatMessage> findBySenderAndRecipientOrderByDesc(@Param("senderId") Long senderId, @Param("recipientId") Long recipientId);
+
+    @Query("SELECT m FROM ChatMessage m WHERE ((m.sender.id = :a AND m.recipient.id = :b) OR (m.sender.id = :b AND m.recipient.id = :a)) AND m.relatedItemId IS NOT NULL ORDER BY m.sentAt ASC")
+    List<ChatMessage> findConversationWithItemId(@Param("a") Long a, @Param("b") Long b);
 }
