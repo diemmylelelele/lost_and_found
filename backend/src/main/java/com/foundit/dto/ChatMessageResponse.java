@@ -21,4 +21,5 @@ public class ChatMessageResponse {
     private String content;
     private LocalDateTime sentAt;
     private boolean read;
+    private boolean senderIsAnonymous;
 }

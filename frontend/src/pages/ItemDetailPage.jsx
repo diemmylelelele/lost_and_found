@@ -84,7 +84,7 @@ export default function ItemDetailPage() {
   }
 
   const handleChat = () => {
-    if (item?.reporterId) navigate(`/chat/${item.reporterId}`)
+    if (item?.reporterId) navigate(`/chat/${item.reporterId}?itemId=${item.id}${item.isPublic === false ? '&anonymous=true' : ''}`)
   }
 
   const handleFinderVerify = async () => {

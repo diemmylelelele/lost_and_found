@@ -152,7 +152,7 @@ export default function ItemCard({ item: initialItem }) {
           </h3>
           {showChat && (
             <button
-              onClick={(e) => { e.stopPropagation(); navigate(`/chat/${reporterId}${isAnonymous ? '?anonymous=true' : ''}`) }}
+              onClick={(e) => { e.stopPropagation(); navigate(`/chat/${reporterId}?itemId=${id}${isAnonymous ? '&anonymous=true' : ''}`) }}
               className="flex-shrink-0 px-3 py-1.5 text-xs font-semibold text-white rounded-full whitespace-nowrap hover:opacity-90 transition-opacity"
               style={{ backgroundColor: '#03045E' }}
             >

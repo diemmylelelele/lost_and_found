@@ -33,4 +33,6 @@ public class ChatMessage {
     private LocalDateTime sentAt;
 
     private boolean read;
+
+    private boolean senderIsAnonymous;
 }

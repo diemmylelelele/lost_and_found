@@ -19,4 +19,5 @@ public class ConversationSummary {
     private String lastMessage;
     private LocalDateTime lastMessageTime;
     private int unreadCount;
+    private boolean partnerIsAnonymous;
 }

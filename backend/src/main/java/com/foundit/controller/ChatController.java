@@ -35,7 +35,7 @@ public class ChatController {
             @Valid @RequestBody ChatMessageRequest request,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(
-                chatService.sendMessage(currentUser.getId(), recipientId, request.getContent()));
+                chatService.sendMessage(currentUser.getId(), recipientId, request.getContent(), request.getItemId()));
     }
 
     @GetMapping("/api/conversations")

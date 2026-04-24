@@ -10,4 +10,6 @@ public class ChatMessageRequest {
 
     @NotBlank(message = "Message content cannot be blank")
     private String content;
+
+    private Long itemId;
 }

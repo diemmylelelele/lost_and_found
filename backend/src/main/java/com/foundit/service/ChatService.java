@@ -5,6 +5,7 @@ import com.foundit.dto.ConversationSummary;
 import com.foundit.model.ChatMessage;
 import com.foundit.model.User;
 import com.foundit.repository.ChatMessageRepository;
+import com.foundit.repository.ItemRepository;
 import com.foundit.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
 
@@ -40,17 +42,21 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageResponse sendMessage(Long senderId, Long recipientId, String content) {
+    public ChatMessageResponse sendMessage(Long senderId, Long recipientId, String content, Long itemId) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException("Sender not found"));
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new EntityNotFoundException("Recipient not found"));
+
+        // senderIsAnonymous = true if THIS sender is the anonymous poster
+        boolean senderIsAnonymous = itemRepository.existsByUserIdAndIsPublicFalse(senderId);
 
         ChatMessage message = ChatMessage.builder()
                 .sender(sender)
                 .recipient(recipient)
                 .content(content)
                 .read(false)
+                .senderIsAnonymous(senderIsAnonymous)
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
@@ -63,9 +69,10 @@ public class ChatService {
                 response);
 
         // Create a notification for the recipient
-        String senderDisplayName = (sender.getName() != null && !sender.getName().isBlank())
-                ? sender.getName()
-                : sender.getEmail().split("@")[0];
+        String senderDisplayName = senderIsAnonymous ? "Anonymous Member"
+                : (sender.getName() != null && !sender.getName().isBlank())
+                        ? sender.getName()
+                        : sender.getEmail().split("@")[0];
         String preview = content.length() > 60 ? content.substring(0, 60) + "..." : content;
         notificationService.createChatNotification(recipient, sender.getId(), senderDisplayName, preview);
 
@@ -87,13 +94,16 @@ public class ChatService {
             ChatMessage lastMsg = conversation.get(conversation.size() - 1);
             List<ChatMessage> unread = chatMessageRepository.findUnreadFrom(userId, partnerId);
 
+            boolean partnerIsAnonymous = itemRepository.existsByUserIdAndIsPublicFalse(partnerId);
+            String partnerDisplayName = partnerIsAnonymous ? "Anonymous Member" : partner.getName();
             summaries.add(ConversationSummary.builder()
                     .partnerId(partnerId)
-                    .partnerName(partner.getName())
-                    .partnerEmail(partner.getEmail())
+                    .partnerName(partnerDisplayName)
+                    .partnerEmail(partnerIsAnonymous ? null : partner.getEmail())
                     .lastMessage(lastMsg.getContent())
                     .lastMessageTime(lastMsg.getSentAt())
                     .unreadCount(unread.size())
+                    .partnerIsAnonymous(partnerIsAnonymous)
                     .build());
         }
 
@@ -108,15 +118,17 @@ public class ChatService {
     }
 
     private ChatMessageResponse toResponse(ChatMessage msg) {
+        boolean anon = msg.isSenderIsAnonymous();
         return ChatMessageResponse.builder()
                 .id(msg.getId())
                 .senderId(msg.getSender().getId())
-                .senderName(msg.getSender().getName())
+                .senderName(anon ? "Anonymous Member" : msg.getSender().getName())
                 .recipientId(msg.getRecipient().getId())
                 .recipientName(msg.getRecipient().getName())
                 .content(msg.getContent())
                 .sentAt(msg.getSentAt())
                 .read(msg.isRead())
+                .senderIsAnonymous(anon)
                 .build();
     }
 }

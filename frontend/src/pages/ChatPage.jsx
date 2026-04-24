@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Send, Image, MessageSquare } from 'lucide-react'
 import { getConversations, getConversation, sendMessage } from '../api/messages'
 import { getUserById } from '../api/users'
@@ -33,6 +33,9 @@ function getAvatarColor(id) {
 
 export default function ChatPage() {
   const { partnerId } = useParams()
+  const [searchParams] = useSearchParams()
+  const itemId = searchParams.get('itemId')
+  const anonymousFromUrl = searchParams.get('anonymous') === 'true'
   const navigate = useNavigate()
   const { user } = useAuth()
 
@@ -97,10 +100,9 @@ export default function ChatPage() {
     if (!newMessage.trim() || !partnerId) return
     setSending(true)
     try {
-      const res = await sendMessage(partnerId, newMessage.trim())
+      const res = await sendMessage(partnerId, newMessage.trim(), itemId)
       setMessages(prev => [...prev, res.data || res])
       setNewMessage('')
-      // Update conversation list preview
       setConversations(prev => prev.map(c =>
         String(c.partnerId) === String(partnerId)
           ? { ...c, lastMessage: newMessage.trim(), lastMessageTime: new Date().toISOString() }
@@ -117,7 +119,10 @@ export default function ChatPage() {
     return matchSearch && matchFilter
   })
 
-  const activePartnerName = activePartner
+  const partnerIsAnonymous = anonymousFromUrl || activePartner?.partnerIsAnonymous === true
+  const activePartnerName = partnerIsAnonymous
+    ? 'Anonymous Member'
+    : activePartner
     ? getDisplayName(activePartner.partnerName, activePartner.partnerEmail)
     : ''
 
