@@ -225,8 +225,8 @@ export default function ItemDetailPage() {
             )}
 
             {hidePrivateDetails && (
-              <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[200px] flex items-center justify-center">
-                <p className="text-sm text-gray-400 text-center leading-relaxed">
+              <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[170px] flex items-center justify-center">
+                <p className="text-base text-gray-400 text-center leading-relaxed">
                   This is a valuable item. Description and image are hidden.<br/>
                   Submit a claim to verify ownership.
                 </p>

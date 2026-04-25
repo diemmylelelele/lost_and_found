@@ -130,10 +130,11 @@ export default function ChatPage() {
   }, [])
 
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-gray-50">
+    <div className="bg-gray-50 h-[calc(100vh-64px)] px-6 py-4">
+      <div className="max-w-7xl mx-auto h-full flex gap-4">
 
       {/* Left panel — conversations */}
-      <div className="w-80 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-80 flex-shrink-0 bg-white border border-gray-200 rounded-2xl flex flex-col overflow-hidden">
         {/* Title */}
         <div className="px-5 pt-5 pb-3">
           <h2 className="text-2xl font-bold text-gray-900">Chat</h2>
@@ -226,7 +227,7 @@ export default function ChatPage() {
       </div>
 
       {/* Right panel — active chat */}
-      <div className="flex-1 flex flex-col bg-white">
+      <div className="flex-1 flex flex-col bg-white border border-gray-200 rounded-2xl overflow-hidden">
         {!partnerId ? (
           <div className="flex flex-col items-center justify-center flex-1 text-center p-8">
             <MessageSquare size={48} className="text-gray-200 mb-3" />
@@ -317,6 +318,7 @@ export default function ChatPage() {
             </form>
           </>
         )}
+      </div>
       </div>
     </div>
   )

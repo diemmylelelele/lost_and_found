@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Bell, LogOut, User, ChevronDown } from 'lucide-react'
+import { Bell, LogOut, User, ChevronDown, MessageCircle } from 'lucide-react'
 import { Client } from '@stomp/stompjs'
 import { useAuth } from '../context/AuthContext'
 import { getNotifications, markRead } from '../api/notifications'
@@ -144,11 +144,15 @@ export default function Navbar() {
 
           <NavLink to="/post/found" className={({ isActive }) =>
             `px-4 py-2 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-gold' : 'text-gray-700 hover:text-brand-gold'}`
-          }>Found Item Report</NavLink>
+          }>Report Found Item</NavLink>
 
           <NavLink to="/post/lost" className={({ isActive }) =>
             `px-4 py-2 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-gold' : 'text-gray-700 hover:text-brand-gold'}`
-          }>Lost Item Report</NavLink>
+          }>Report Lost Item</NavLink>
+
+          <NavLink to="/chat" className={({ isActive }) =>
+            `px-4 py-2 text-sm font-medium rounded-full transition-colors ${isActive ? 'text-brand-gold' : 'text-gray-700 hover:text-brand-gold'}`
+          }>Chat</NavLink>
           {isAuthenticated ? (
             <>
               {/* Notification bell + popup */}
@@ -269,7 +273,7 @@ export default function Navbar() {
                     <hr className="my-1 border-gray-100" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <LogOut size={15} />
                       Sign Out
