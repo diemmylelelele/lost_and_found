@@ -154,27 +154,25 @@ export default function PostItemPage() {
                     />
                   </div>
                 </div>
-                {isFound && (
-                  <div>
-                    <label className={labelCls}>Save form as public</label>
-                    <div className="relative">
-                      <select
-                        name="isPublic"
-                        value={form.isPublic}
-                        onChange={handleChange}
-                        className={inputCls}
-                      >
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                      <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                      </span>
-                    </div>
+                <div>
+                  <label className={labelCls}>Do you want to public your name on this post?</label>
+                  <div className="relative">
+                    <select
+                      name="isPublic"
+                      value={form.isPublic}
+                      onChange={handleChange}
+                      className={inputCls}
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Right column — description */}
