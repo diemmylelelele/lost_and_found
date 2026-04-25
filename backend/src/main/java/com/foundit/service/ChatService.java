@@ -107,8 +107,25 @@ public class ChatService {
             ChatMessage lastMsg = conversation.get(conversation.size() - 1);
             List<ChatMessage> unread = chatMessageRepository.findUnreadFrom(userId, partnerId);
 
+            // Check if partner sent any message marked anonymous
             boolean partnerIsAnonymous = conversation.stream()
                     .anyMatch(m -> m.getSender().getId().equals(partnerId) && m.isSenderIsAnonymous());
+
+            // Fallback: if partner hasn't replied yet, check if the item this conversation
+            // is about was posted anonymously by the partner
+            if (!partnerIsAnonymous) {
+                Long relatedItemId = conversation.stream()
+                        .filter(m -> m.getRelatedItemId() != null)
+                        .findFirst()
+                        .map(ChatMessage::getRelatedItemId)
+                        .orElse(null);
+                if (relatedItemId != null) {
+                    partnerIsAnonymous = itemRepository.findById(relatedItemId)
+                            .map(item -> item.getUser().getId().equals(partnerId) && !item.isPublic())
+                            .orElse(false);
+                }
+            }
+
             String partnerDisplayName = partnerIsAnonymous ? "Anonymous Member" : partner.getName();
             summaries.add(ConversationSummary.builder()
                     .partnerId(partnerId)
