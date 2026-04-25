@@ -118,7 +118,7 @@ export default function ItemCard({ item: initialItem }) {
         <div className="bg-gray-100 cursor-pointer" style={{ height: '160px' }} onClick={() => navigate(`/items/${id}`)}>
           {imageUrl ? (
             <img
-              src={imageUrl}
+              src={imageUrl.split('|')[0]}
               alt={displayName}
               className="w-full h-full object-cover"
               onError={(e) => {

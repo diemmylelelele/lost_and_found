@@ -20,8 +20,8 @@ export default function PostItemPage() {
     name: '', description: '', category: '',
     locationFound: '', date: '', isPublic: 'Yes',
   })
-  const [imagePreview, setImagePreview] = useState(null)
-  const [imageFile, setImageFile] = useState(null)
+  const [imageFiles, setImageFiles] = useState([])
+  const [imagePreviews, setImagePreviews] = useState([])
   const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -30,19 +30,21 @@ export default function PostItemPage() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return }
-    if (file.size > 10 * 1024 * 1024) { setError('Image must be smaller than 10MB.'); return }
+    const files = Array.from(e.target.files)
+    if (!files.length) return
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) { setError('Please select image files only.'); return }
+      if (file.size > 10 * 1024 * 1024) { setError('Each image must be smaller than 10MB.'); return }
+    }
     setError('')
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+    setImageFiles(prev => [...prev, ...files])
+    setImagePreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))])
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const clearImage = () => {
-    setImagePreview(null)
-    setImageFile(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+  const removeImage = (index) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index))
+    setImagePreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e) => {
@@ -51,13 +53,16 @@ export default function PostItemPage() {
     setError('')
 
     let imageUrl = ''
-    if (imageFile) {
+    if (imageFiles.length > 0) {
       setUploading(true)
       try {
-        const uploadRes = await uploadImage(imageFile)
-        imageUrl = uploadRes.data.url
+        const urls = await Promise.all(imageFiles.map(async (file) => {
+          const res = await uploadImage(file)
+          return res.data.url
+        }))
+        imageUrl = urls.join('|')
       } catch {
-        setError('Failed to upload image. Please try again.')
+        setError('Failed to upload images. Please try again.')
         setUploading(false)
         return
       }
@@ -189,35 +194,35 @@ export default function PostItemPage() {
             {/* Photo Upload — full width below */}
             <div className="mb-2">
               <label className={labelCls}>Photo Upload</label>
-              {imagePreview ? (
-                <div className="relative w-full border border-gray-200 rounded-2xl overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full max-h-40 object-contain bg-gray-50"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                  >
-                    <X size={13} />
-                  </button>
+              {imagePreviews.length > 0 && (
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {imagePreviews.map((src, i) => (
+                    <div key={i} className="relative border border-gray-200 rounded-2xl overflow-hidden" style={{ width: '120px', height: '100px' }}>
+                      <img src={src} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                      >
+                        <X size={11} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-2.5 border border-gray-200 rounded-full text-sm text-gray-500 flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors bg-white"
-                >
-                  <Upload size={15} />
-                  Upload Image
-                </button>
               )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-2.5 border border-gray-200 rounded-full text-sm text-gray-500 flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors bg-white"
+              >
+                <Upload size={15} />
+                {imagePreviews.length > 0 ? 'Add More Images' : 'Upload Images'}
+              </button>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleFileChange}
                 className="hidden"
               />

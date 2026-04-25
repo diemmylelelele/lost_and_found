@@ -130,13 +130,11 @@ export default function ItemDetailPage() {
   const hidePrivateDetails = valuable && isFound && !isOwner && !isClaimed
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col bg-gray-50">
 
       {/* Search + Filter bar */}
-      <div className="bg-gray-50 py-4">
+      <div className="py-4">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-3">
-
-          {/* Type filter tabs */}
           <div className="flex items-center flex-shrink-0 border border-gray-200 rounded-full bg-white overflow-hidden">
             {[{ label: 'All Items', value: '' }, { label: 'Lost Items', value: 'LOST' }, { label: 'Found Items', value: 'FOUND' }].map((opt) => (
               <button
@@ -148,8 +146,6 @@ export default function ItemDetailPage() {
               </button>
             ))}
           </div>
-
-          {/* Search bar */}
           <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '650px' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -161,12 +157,11 @@ export default function ItemDetailPage() {
               onKeyDown={e => { if (e.key === 'Enter') navigate(`/?q=${e.target.value}`) }}
             />
           </div>
-
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-10 bg-gray-50">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-6">
         <div className="flex gap-10 items-start">
 
           {/* Left — image */}
@@ -179,12 +174,22 @@ export default function ItemDetailPage() {
                 <span className="text-gray-400 text-sm mt-3">Image hidden for privacy</span>
               </div>
             ) : item.imageUrl ? (
-              <img
-                src={item.imageUrl}
-                alt={item.name}
-                className="w-full object-contain bg-gray-50 rounded-2xl"
-                style={{ maxHeight: '460px' }}
-              />
+              (() => {
+                const urls = item.imageUrl.split('|').filter(Boolean)
+                return (
+                  <div className="flex flex-col gap-3 overflow-y-auto" style={{ height: '460px' }}>
+                    {urls.map((url, i) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`${item.name} ${i + 1}`}
+                        className="w-full object-contain bg-white rounded-2xl flex-shrink-0"
+                        style={{ height: '460px' }}
+                      />
+                    ))}
+                  </div>
+                )
+              })()
             ) : (
               <div className="w-full bg-gray-100 rounded-2xl flex items-center justify-center" style={{ height: '380px' }}>
                 <span className="text-gray-400 text-sm">No image</span>
