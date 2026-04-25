@@ -146,7 +146,7 @@ export default function ItemDetailPage() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '650px' }}>
+          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '720px' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
@@ -165,7 +165,7 @@ export default function ItemDetailPage() {
         <div className="flex gap-10 items-start">
 
           {/* Left — image */}
-          <div className="w-[44%] flex-shrink-0">
+          <div className="w-[38.5%] flex-shrink-0">
             {hidePrivateDetails ? (
               <div className="w-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center" style={{ height: '380px' }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
