@@ -25,8 +25,9 @@ public class ChatController {
     @GetMapping("/api/messages/{partnerId}")
     public ResponseEntity<List<ChatMessageResponse>> getConversation(
             @PathVariable Long partnerId,
+            @RequestParam(required = false) Long itemId,
             @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(chatService.getConversation(currentUser.getId(), partnerId));
+        return ResponseEntity.ok(chatService.getConversation(currentUser.getId(), partnerId, itemId));
     }
 
     @PostMapping("/api/messages/{recipientId}")

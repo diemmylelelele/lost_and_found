@@ -103,7 +103,10 @@ export default function Navbar() {
     }
     setNotifOpen(false)
     if (n.chatSenderId) {
-      navigate(`/chat/${n.chatSenderId}`)
+      const chatUrl = n.relatedItemId
+        ? `/chat/${n.chatSenderId}?itemId=${n.relatedItemId}`
+        : `/chat/${n.chatSenderId}`
+      navigate(chatUrl)
     } else if (n.relatedItemId) {
       // Match notification: if navigating to a lost item, pass the found item id so the finder can verify
       if (n.foundItemId && n.lostItemId && String(n.relatedItemId) === String(n.lostItemId)) {

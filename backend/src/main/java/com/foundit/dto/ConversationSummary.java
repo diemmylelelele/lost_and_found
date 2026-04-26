@@ -16,6 +16,8 @@ public class ConversationSummary {
     private Long partnerId;
     private String partnerName;
     private String partnerEmail;
+    private Long itemId;
+    private String itemName;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
     private int unreadCount;
