@@ -184,7 +184,7 @@ export default function ProfilePage() {
   if (loading) return <div className="flex justify-center py-20"><LoadingSpinner /></div>
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-[calc(100vh-64px)] flex flex-col bg-gray-50">
 
       {/* Main content */}
       <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">

@@ -45,7 +45,7 @@ export default function HomePage() {
   })
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-[calc(100vh-64px)] bg-white">
 
       {/* Search + Filter bar */}
       <div className="bg-gray-50 py-4">
@@ -70,7 +70,7 @@ export default function HomePage() {
           </div>
 
           {/* Search bar */}
-          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '720px' }}>
+          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '710px' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
