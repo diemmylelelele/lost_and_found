@@ -143,7 +143,7 @@ export default function ChatPage() {
         {/* Search */}
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input
@@ -178,7 +178,7 @@ export default function ChatPage() {
           ) : filteredConvos.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <MessageSquare size={32} className="text-gray-200 mb-2" />
-              <p className="text-sm text-gray-400">No conversations yet</p>
+              <p className="text-sm text-gray-500">No conversations yet</p>
             </div>
           ) : (
             filteredConvos.map(convo => {
@@ -205,7 +205,7 @@ export default function ChatPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-bold text-gray-900 truncate">{name}</span>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
                           {timeAgo(convo.lastMessageTime)}
                         </span>
                       </div>
@@ -232,7 +232,7 @@ export default function ChatPage() {
           <div className="flex flex-col items-center justify-center flex-1 text-center p-8">
             <MessageSquare size={48} className="text-gray-200 mb-3" />
             <p className="text-gray-500 font-medium">Select a conversation</p>
-            <p className="text-sm text-gray-400 mt-1">Click Chat on any item to start messaging.</p>
+            <p className="text-sm text-gray-500 mt-1">Click Chat on any item to start messaging.</p>
           </div>
         ) : (
           <>
@@ -254,7 +254,7 @@ export default function ChatPage() {
               {loadingMessages ? (
                 <div className="flex justify-center py-8"><LoadingSpinner /></div>
               ) : groupedMessages.length === 0 ? (
-                <div className="text-center text-sm text-gray-400 py-8">No messages yet. Say hello!</div>
+                <div className="text-center text-sm text-gray-500 py-8">No messages yet. Say hello!</div>
               ) : (
                 groupedMessages.map(msg => {
                   // A message is mine if I sent it TO the partner (recipientId === partnerId)
@@ -263,7 +263,7 @@ export default function ChatPage() {
                     <div key={msg.id}>
                       {msg.showTime && (
                         <div className="flex justify-center my-3">
-                          <span className="text-xs text-gray-400">{formatTime(msg.sentAt)}</span>
+                          <span className="text-xs text-gray-500">{formatTime(msg.sentAt)}</span>
                         </div>
                       )}
                       <div className={`flex items-end gap-2 mb-1 ${isMine ? 'justify-end' : 'justify-start'}`}>

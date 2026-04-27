@@ -166,7 +166,7 @@ export default function PostItemPage() {
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
                     </select>
-                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="6 9 12 15 18 9" />
                       </svg>

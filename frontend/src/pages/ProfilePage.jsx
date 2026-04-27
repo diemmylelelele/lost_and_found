@@ -202,7 +202,7 @@ export default function ProfilePage() {
             <p className="text-xs text-gray-700 mb-5">{displayEmail}</p>
             <button
               onClick={openEdit}
-              className="w-full py-2 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-100 transition-colors"
+              className="w-full py-2 rounded-full text-sm text-gray-700 hover:bg-gray-400 transition-colors"
               style={{ backgroundColor: '#D1D5DB' }}
             >
               Edit profile
@@ -212,19 +212,19 @@ export default function ProfilePage() {
           {/* Right — search + items list */}
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1">
-              <div className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5">
+              <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2.5">
                 <input
                   type="text"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Find an item ..."
-                  className="w-full text-sm outline-none text-gray-700 placeholder-gray-400"
+                  className="w-full text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
                 />
               </div>
               <div className="relative" ref={typeRef}>
                 <button
                   onClick={() => setTypeOpen(o => !o)}
-                  className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   {typeFilter === 'All' ? 'Type' : typeFilter} <ChevronDown size={14} />
                 </button>
@@ -290,7 +290,7 @@ export default function ProfilePage() {
 
       {/* Edit Profile Modal */}
       {editOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
             <button
               onClick={() => setEditOpen(false)}
@@ -299,7 +299,7 @@ export default function ProfilePage() {
               <X size={20} />
             </button>
 
-            <h2 className="text-lg font-bold text-gray-900 mb-5">Edit Profile</h2>
+            <h2 className="text-lg  font-bold text-gray-700 mb-5">Edit Profile</h2>
 
             {/* Avatar upload */}
             <div className="flex flex-col items-center mb-5">
