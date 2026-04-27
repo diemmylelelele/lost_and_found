@@ -58,10 +58,10 @@ export default function HomePage() {
                 key={opt.value}
                 onClick={() => setTypeFilter(opt.value)}
                 style={typeFilter === opt.value ? { color: '#EEA40F' } : {}}
-                className={`px-4 py-3 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-3 rounded-full text-sm transition-colors ${
                   typeFilter === opt.value
-                    ? 'font-semibold'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? ''
+                    : 'text-gray-500 hover:text-brand-gold'
                 }`}
               >
                 {opt.label}
@@ -79,7 +79,7 @@ export default function HomePage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search for items"
-              className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
+              className="text-sm outline-none text-gray-500 placeholder-gray-500 w-full bg-transparent"
             />
           </div>
 
