@@ -140,7 +140,7 @@ export default function ItemDetailPage() {
               <button
                 key={opt.value}
                 onClick={() => navigate(opt.value ? `/?type=${opt.value}` : '/')}
-                className="px-4 py-3 rounded-full text-sm font-medium transition-colors text-gray-500 hover:text-gray-700"
+                className="px-4 py-3 rounded-full text-sm transition-colors text-gray-500 hover:text-brand-gold"
               >
                 {opt.label}
               </button>
@@ -153,7 +153,7 @@ export default function ItemDetailPage() {
             <input
               type="text"
               placeholder="Search for items"
-              className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
+              className="text-sm outline-none text-gray-500 placeholder-gray-400 w-full bg-transparent"
               onKeyDown={e => { if (e.key === 'Enter') navigate(`/?q=${e.target.value}`) }}
             />
           </div>
