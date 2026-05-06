@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { MapPin } from 'lucide-react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { getItem, claimSimple, approveClaim } from '../api/items'
 import { useAuth } from '../context/AuthContext'
@@ -130,64 +131,69 @@ export default function ItemDetailPage() {
   const hidePrivateDetails = valuable && isFound && !isOwner && !isClaimed
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col bg-gray-50">
 
       {/* Search + Filter bar */}
-      <div className="bg-gray-50 py-4">
+      <div className="py-4">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-3">
-
-          {/* Type filter tabs */}
           <div className="flex items-center flex-shrink-0 border border-gray-200 rounded-full bg-white overflow-hidden">
             {[{ label: 'All Items', value: '' }, { label: 'Lost Items', value: 'LOST' }, { label: 'Found Items', value: 'FOUND' }].map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => navigate(opt.value ? `/?type=${opt.value}` : '/')}
-                className="px-4 py-3 rounded-full text-sm font-medium transition-colors text-gray-500 hover:text-gray-700"
+                className="px-4 py-3 rounded-full text-sm transition-colors text-gray-500 hover:text-brand-gold"
               >
                 {opt.label}
               </button>
             ))}
           </div>
-
-          {/* Search bar */}
-          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '650px' }}>
+          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-3 bg-white ml-auto" style={{ width: '720px' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input
               type="text"
               placeholder="Search for items"
-              className="text-sm outline-none text-gray-600 placeholder-gray-400 w-full bg-transparent"
+              className="text-sm outline-none text-gray-500 placeholder-gray-400 w-full bg-transparent"
               onKeyDown={e => { if (e.key === 'Enter') navigate(`/?q=${e.target.value}`) }}
             />
           </div>
-
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-10 bg-gray-50">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-6 pt-8 pb-6">
         <div className="flex gap-10 items-start">
 
           {/* Left — image */}
-          <div className="w-[44%] flex-shrink-0">
+          <div className="w-[38.5%] flex-shrink-0">
             {hidePrivateDetails ? (
               <div className="w-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center" style={{ height: '380px' }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
                   <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
                 </svg>
-                <span className="text-gray-400 text-sm mt-3">Image hidden for privacy</span>
+                <span className="text-gray-500 text-sm mt-3">Image hidden for privacy</span>
               </div>
             ) : item.imageUrl ? (
-              <img
-                src={item.imageUrl}
-                alt={item.name}
-                className="w-full object-contain bg-gray-50 rounded-2xl"
-                style={{ maxHeight: '460px' }}
-              />
+              (() => {
+                const urls = item.imageUrl.split('|').filter(Boolean)
+                return (
+                  <div className="flex flex-col gap-3 overflow-y-auto" style={{ height: '460px' }}>
+                    {urls.map((url, i) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`${item.name} ${i + 1}`}
+                        className="w-full object-contain bg-white rounded-2xl flex-shrink-0"
+                        style={{ height: '460px' }}
+                      />
+                    ))}
+                  </div>
+                )
+              })()
             ) : (
               <div className="w-full bg-gray-100 rounded-2xl flex items-center justify-center" style={{ height: '380px' }}>
-                <span className="text-gray-400 text-sm">No image</span>
+                <span className="text-gray-500 text-sm">No image</span>
               </div>
             )}
           </div>
@@ -206,27 +212,30 @@ export default function ItemDetailPage() {
             </p>
 
             {item.dateEvent && (
-              <p className="text-xs text-gray-500 mb-1">
+              <p className="text-sm text-gray-500 mb-2">
                 {isFound ? 'Date found' : 'Date lost'}: {new Date(item.dateEvent).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </p>
             )}
 
             {item.locationFound && (
-              <p className="text-sm text-gray-500 mb-5">{item.locationFound}</p>
+              <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
+                <MapPin size={14} className="text-brand-gold flex-shrink-0" />
+                <span>{item.locationFound}</span>
+              </div>
             )}
 
             {/* Description box */}
             {!hidePrivateDetails && (
               <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[200px]">
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed">
                   {item.description || ''}
                 </p>
               </div>
             )}
 
             {hidePrivateDetails && (
-              <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[200px] flex items-center justify-center">
-                <p className="text-sm text-gray-400 text-center leading-relaxed">
+              <div className="border border-gray-200 rounded-2xl p-4 mb-6 min-h-[170px] flex items-center justify-center">
+                <p className="text-sm text-gray-500 text-center leading-relaxed">
                   This is a valuable item. Description and image are hidden.<br/>
                   Submit a claim to verify ownership.
                 </p>
@@ -241,7 +250,7 @@ export default function ItemDetailPage() {
             {/* Action buttons — below description */}
             {verifyFoundItemId && !isClaimed ? (
               <div className="flex flex-col gap-3">
-                <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-sm text-center">
+                <div className="p-3 bg-gray-50 text-gray-500 rounded-lg text-sm text-center">
                   This lost item has a high chance to match your found item. Verify to confirm or chat to discuss.
                 </div>
                 <div className="flex justify-center gap-4">
@@ -264,7 +273,7 @@ export default function ItemDetailPage() {
               </div>
             ) : isClaimed ? (
               <div className="flex flex-col gap-3">
-                <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center font-medium">
+                <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
                   This item has been claimed by {item.claimantName || 'someone'}
                 </div>
                 <div className="flex justify-center gap-4">
@@ -285,7 +294,7 @@ export default function ItemDetailPage() {
               </div>
             ) : isOwner && hasPendingClaim ? (
               <div className="flex flex-col gap-3">
-                <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-sm text-center">
+                <div className="p-3 bg-gray-50 text-gray-500 rounded-lg text-sm text-center">
                   There is a high chance this item belongs to the claimer. Verify to confirm or chat to discuss.
                 </div>
                 <div className="flex justify-center gap-4">
