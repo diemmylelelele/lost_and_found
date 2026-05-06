@@ -55,6 +55,14 @@ export default function ChatPage() {
       .then(res => setConversations(res.data || []))
       .catch(() => {})
       .finally(() => setLoadingConvos(false))
+
+    const interval = setInterval(() => {
+      getConversations()
+        .then(res => setConversations(res.data || []))
+        .catch(() => {})
+    }, 3000)
+
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
