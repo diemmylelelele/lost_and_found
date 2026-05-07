@@ -13,6 +13,7 @@ import ChatPage from './pages/ChatPage'
 import NotificationsPage from './pages/NotificationsPage'
 import ProfilePage from './pages/ProfilePage'
 import ClaimVerificationPage from './pages/ClaimVerificationPage'
+import EditItemPage from './pages/EditItemPage'
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
                     <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                     <Route path="/claim/:id" element={<ProtectedRoute><ClaimVerificationPage /></ProtectedRoute>} />
+                    <Route path="/items/:id/edit" element={<ProtectedRoute><EditItemPage /></ProtectedRoute>} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </>

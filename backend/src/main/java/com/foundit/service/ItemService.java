@@ -300,6 +300,26 @@ public class ItemService {
     }
 
     @Transactional
+    public ItemResponse updateItem(Long itemId, ItemRequest req, Long userId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));
+        if (!item.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("You can only edit your own items");
+        }
+        if (item.getStatus() == ItemStatus.CLAIMED) {
+            throw new IllegalArgumentException("Cannot edit an item that has already been claimed");
+        }
+        item.setName(req.getName());
+        item.setDescription(req.getDescription());
+        item.setCategory(req.getCategory());
+        item.setLocationFound(req.getLocationFound());
+        item.setImageUrl(req.getImageUrl());
+        item.setDateEvent(req.getDateEvent());
+        item.setIsPublic(req.isPublic());
+        return toResponse(itemRepository.save(item));
+    }
+
+    @Transactional
     public void deleteItem(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));

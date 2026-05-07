@@ -85,6 +85,14 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getItemsByUser(currentUser.getId()));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ItemResponse> updateItem(
+            @PathVariable Long id,
+            @Valid @RequestBody ItemRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(itemService.updateItem(id, request, currentUser.getId()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(
             @PathVariable Long id,

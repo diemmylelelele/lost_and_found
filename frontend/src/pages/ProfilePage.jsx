@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, Camera, X, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { Camera, X, Eye, EyeOff, User, Clock, Tag, Pencil, Trash2 } from 'lucide-react'
 import { getProfile, updateProfile, changePassword } from '../api/users'
 import { getMyItems, deleteItem } from '../api/items'
 import { useAuth } from '../context/AuthContext'
@@ -19,10 +19,16 @@ function DefaultAvatar({ size = 208 }) {
 }
 
 function StatusBadge({ item }) {
-  const label = item.status === 'CLAIMED' ? 'Claimed'
-    : item.itemType === 'FOUND' ? 'Found' : 'Lost'
+  const isClaimed = item.status === 'CLAIMED'
+  const isPending = item.claimantId && !isClaimed
+  const label = isClaimed ? 'Claimed' : isPending ? 'Pending' : item.itemType === 'FOUND' ? 'Active' : 'Active'
+  const colors = isClaimed
+    ? 'bg-gray-100 text-gray-500'
+    : isPending
+    ? 'bg-yellow-50 text-yellow-600'
+    : 'bg-amber-50 text-amber-500'
   return (
-    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colors}`}>
       {label}
     </span>
   )
@@ -56,8 +62,6 @@ export default function ProfilePage() {
   // Item filter
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('All')
-  const [typeOpen, setTypeOpen] = useState(false)
-  const typeRef = useRef(null)
   const fileInputRef = useRef(null)
 
   useEffect(() => {
@@ -70,14 +74,6 @@ export default function ProfilePage() {
       finally { setLoading(false) }
     }
     fetchAll()
-  }, [])
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (typeRef.current && !typeRef.current.contains(e.target)) setTypeOpen(false)
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const openEdit = () => {
@@ -171,11 +167,13 @@ export default function ProfilePage() {
   const filteredItems = myItems.filter(item => {
     const matchSearch = item.name?.toLowerCase().includes(search.toLowerCase())
     const matchType = typeFilter === 'All'
-      || (typeFilter === 'Lost' && item.itemType === 'LOST' && item.status !== 'CLAIMED')
-      || (typeFilter === 'Found' && item.itemType === 'FOUND' && item.status !== 'CLAIMED')
-      || (typeFilter === 'Claimed' && item.status === 'CLAIMED')
+      || (typeFilter === 'Lost' && item.itemType === 'LOST')
+      || (typeFilter === 'Found' && item.itemType === 'FOUND')
     return matchSearch && matchType
   })
+
+  const reportedCount = myItems.length
+  const resolvedCount = myItems.filter(i => i.status === 'CLAIMED').length
 
   const displayName = profile?.name || authUser?.name || 'Username'
   const displayEmail = profile?.email || authUser?.email || ''
@@ -184,95 +182,141 @@ export default function ProfilePage() {
   if (loading) return <div className="flex justify-center py-20"><LoadingSpinner /></div>
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex flex-col bg-gray-50">
+    <div className="min-h-[calc(100vh-64px)] bg-gray-50">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex gap-6 items-start">
 
-      {/* Main content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">
-        <div className="flex gap-16 items-start">
+        {/* Left — profile card */}
+        <div className="w-96 flex-shrink-0 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+          {/* Banner */}
+          <div className="h-28 bg-white" />
 
-          {/* Left — avatar + info */}
-          <div className="w-64 flex-shrink-0 flex flex-col items-center">
-            <div className="w-52 h-52 rounded-full overflow-hidden flex-shrink-0 mb-4">
+          {/* Avatar — overlapping banner */}
+          <div className="flex flex-col items-center -mt-12 px-6 pb-16">
+            <div className="w-60 h-60 rounded-full overflow-hidden mb-3">
               {avatarSrc
                 ? <img src={avatarSrc} alt={displayName} className="w-full h-full object-cover" />
-                : <DefaultAvatar size={208} />
+                : <DefaultAvatar size={240} />
               }
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-0.5">{displayName}</h2>
-            <p className="text-xs text-gray-700 mb-5">{displayEmail}</p>
+            <h2 className="text-base font-semibold text-gray-900 text-center">{displayName}</h2>
+            <p className="text-xs text-gray-400 text-center mt-0.5 mb-5">{displayEmail}</p>
+
+            {/* Edit button */}
             <button
               onClick={openEdit}
-              className="w-full py-2 rounded-full text-sm text-gray-700 hover:bg-gray-400 transition-colors"
-              style={{ backgroundColor: '#D1D5DB' }}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-full text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors mb-5"
             >
-              Edit profile
+              <User size={14} />
+              Edit Profile
             </button>
-          </div>
 
-          {/* Right — search + items list */}
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2.5">
-                <input
-                  type="text"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Find an item ..."
-                  className="w-full text-sm outline-none bg-transparent text-gray-700 placeholder-gray-400"
-                />
+            {/* Stats */}
+            <div className="flex gap-3 w-full">
+              <div className="flex-1 border border-gray-100 rounded-xl p-2 flex flex-col items-center gap-0.5">
+                <div className="w-4 h-4 rounded-full border flex items-center justify-center" style={{ borderColor: '#F5A623' }}>
+                  <span className="text-[9px]" style={{ color: '#F5A623' }}>+</span>
+                </div>
+                <span className="text-base font-bold text-gray-800">{reportedCount}</span>
+                <span className="text-[9px] font-medium text-gray-400 tracking-wide uppercase">Reported</span>
               </div>
-              <div className="relative" ref={typeRef}>
-                <button
-                  onClick={() => setTypeOpen(o => !o)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  {typeFilter === 'All' ? 'Type' : typeFilter} <ChevronDown size={14} />
-                </button>
-                {typeOpen && (
-                  <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-1">
-                    {['All', 'Lost', 'Found', 'Claimed'].map(opt => (
-                      <button
-                        key={opt}
-                        onClick={() => { setTypeFilter(opt); setTypeOpen(false) }}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${typeFilter === opt ? 'font-semibold text-gray-900' : 'text-gray-700'}`}
-                      >
-                        {opt === 'All' ? 'All types' : opt}
-                      </button>
-                    ))}
-                  </div>
-                )}
+              <div className="flex-1 border border-gray-100 rounded-xl p-2 flex flex-col items-center gap-0.5">
+                <div className="w-4 h-4 rounded-full border flex items-center justify-center" style={{ borderColor: '#F5A623' }}>
+                  <span className="text-[9px]" style={{ color: '#F5A623' }}>✓</span>
+                </div>
+                <span className="text-base font-bold text-gray-800">{resolvedCount}</span>
+                <span className="text-[9px] font-medium text-gray-400 tracking-wide uppercase">Resolved</span>
               </div>
-            </div>
-
-            <div className="divide-y divide-gray-200">
-              {filteredItems.length === 0 ? (
-                <p className="text-sm text-gray-400 py-10 text-center">No items found.</p>
-              ) : (
-                filteredItems.map(item => (
-                  <div
-                    key={item.id}
-                    onClick={() => navigate(`/items/${item.id}`)}
-                    className="py-4 cursor-pointer hover:bg-gray-50 px-2 -mx-2 transition-colors flex items-center justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                        <StatusBadge item={item} />
-                      </div>
-                      <p className="text-xs text-gray-400">Updated on {formatDate(item.datePosted)}</p>
-                    </div>
-                    <button
-                      onClick={(e) => handleDelete(e, item.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))
-              )}
             </div>
           </div>
         </div>
+
+        {/* Right — record history */}
+        <div className="flex-1">
+          {/* Title */}
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-gray-900">My Activity</h3>
+            <p className="text-sm text-gray-400 mt-0.5">Manage and track all items you've lost or found.</p>
+          </div>
+
+          {/* Search + Type filter in one bar */}
+          <div className="flex items-center bg-white border border-gray-200 rounded-full px-4 py-2.5 mb-5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 flex-shrink-0 mr-2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search your reported items (e.g., 'MacBook', 'Keys')..."
+              className="flex-1 text-sm outline-none bg-transparent text-gray-600 placeholder-gray-400"
+            />
+            <div className="flex items-center gap-1 ml-3 pl-3 border-l border-gray-200">
+              {['All', 'Found', 'Lost'].map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setTypeFilter(opt)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                    typeFilter === opt ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Items list */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
+            {filteredItems.length === 0 ? (
+              <p className="text-sm text-gray-400 py-10 text-center">No items found.</p>
+            ) : (
+              filteredItems.map(item => {
+                const isClaimed = item.status === 'CLAIMED'
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => navigate(`/items/${item.id}`)}
+                    className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                        <StatusBadge item={item} />
+                      </div>
+                      {!isClaimed && (
+                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                          <button
+                            onClick={() => navigate(`/items/${item.id}/edit`)}
+                            className="p-1.5 text-gray-400 hover:text-brand-gold transition-colors"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDelete(e, item.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 mt-1.5">
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Tag size={11} />
+                        <span>{item.itemType === 'FOUND' ? 'Found Item' : 'Lost Item'}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Clock size={11} />
+                        <span>Updated on {formatDate(item.datePosted)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+
       </div>
       {/* Edit Profile Modal */}
       {editOpen && (
