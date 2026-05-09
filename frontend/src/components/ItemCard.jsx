@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Package, MoreVertical } from 'lucide-react'
+import { MapPin, Package, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { claimSimple } from '../api/items'
+import { claimSimple, deleteItem } from '../api/items'
 
 const VALUABLE_KEYWORDS = [
   'phone', 'laptop', 'wallet', 'smartwatch', 'tablet', 'airpod',
@@ -20,6 +20,17 @@ export default function ItemCard({ item: initialItem }) {
   const { isAuthenticated, user } = useAuth()
   const [item, setItem] = useState(initialItem)
   const [claiming, setClaiming] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [deleted, setDeleted] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   if (!item) return null
 
@@ -89,6 +100,18 @@ export default function ItemCard({ item: initialItem }) {
 
   const hasPendingClaim = item.claimantId && !isClaimed
 
+  const handleDelete = async (e) => {
+    e.stopPropagation()
+    setMenuOpen(false)
+    if (!window.confirm('Delete this item? This cannot be undone.')) return
+    try {
+      await deleteItem(id)
+      setDeleted(true)
+    } catch { /* silently fail */ }
+  }
+
+  if (deleted) return null
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
 
@@ -105,12 +128,34 @@ export default function ItemCard({ item: initialItem }) {
             Posted at {formatDate(datePosted)} by {byName}
           </p>
         </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); navigate(`/items/${id}`) }}
-          className="text-gray-400 hover:text-gray-600 flex-shrink-0 p-0.5"
-        >
-          <MoreVertical size={16} />
-        </button>
+        <div className="relative flex-shrink-0" ref={menuRef}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o) }}
+            className="text-gray-400 hover:text-gray-600 p-0.5"
+          >
+            <MoreVertical size={16} />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-6 w-36 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50" onClick={e => e.stopPropagation()}>
+              {isOwnItem && !isClaimed && (
+                <>
+                  <button
+                    onClick={() => { setMenuOpen(false); navigate(`/items/${id}/edit`) }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <Pencil size={13} /> Edit
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={13} /> Delete
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Image */}
