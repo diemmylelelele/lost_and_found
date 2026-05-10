@@ -19,7 +19,7 @@ This is the link to demo [video](https://youtu.be/cgAN8niM9D4?si=iUdNlKG_Fw8qLcq
 - Submit reports for lost or found items
 - Browse listings with category filters and keyword search
 - Verification-based claim process for valuable items using score-based matching
-- Smart auto-matching engine for lost and found items using Jaccard similarity across item name,description, and location. Future improvements include AI-powered image analysis.
+- Smart auto-matching engine for lost and found items powered by Ollama (`gemma3:1b`) — uses LLM-based semantic comparison of item name, description, date, and location for each lost/found pair. Matching runs asynchronously in the background after an item is posted.
 - Real-time notifications for item matches and new messages
 - Real-time user-to-user chat powered by WebSocket
 - Delete posted items with ownership control (users can only delete their own posts, and claimed items - cannot be removed)
@@ -39,9 +39,22 @@ https://github.com/diemmylelelele/lost_and_found.git
 | Java JDK | 21 |
 | Node.js | 18 |
 | PostgreSQL | 14 |
-|Maven|http://maven.apache.org/install.html|
+| Maven | http://maven.apache.org/install.html |
+| Ollama | https://ollama.com/download |
 
-### 1. Database Setup
+### 1. Ollama Setup
+
+Install Ollama from https://ollama.com/download, then pull the model and start the server:
+
+```bash
+ollama pull llama3.2
+```
+
+Ollama must be running before you start the backend. It runs at **http://localhost:11434** by default.
+
+> The matching engine calls Ollama in the background after each item is posted. If Ollama is not running, item posting still works — matching is silently skipped and logged.
+
+### 2. Database Setup
 
 Start PostgreSQL and create the database:
 
@@ -56,7 +69,7 @@ CREATE DATABASE founditdb;
 
 > Tables are created automatically when the backend starts. No SQL scripts needed.
 
-### 2. Backend
+### 3. Backend
 
 Open `backend/src/main/resources/application.properties` and set your PostgreSQL password:
 
@@ -78,7 +91,7 @@ Started FoundItApplication in X.XXX seconds
 
 Backend runs at **http://localhost:8080**
 
-### 3. Frontend
+### 4. Frontend
 
 Open a new terminal:
 
@@ -90,6 +103,6 @@ npm run dev
 
 Frontend runs at **http://localhost:5173**
 
-### 4. Open the App
+### 5. Open the App
 
 Visit **http://localhost:5173** and register a new account to get started.
