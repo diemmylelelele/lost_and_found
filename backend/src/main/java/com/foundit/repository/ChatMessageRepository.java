@@ -14,7 +14,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Query("SELECT m FROM ChatMessage m WHERE " +
            "((m.sender.id = :a AND m.recipient.id = :b) OR " +
            "(m.sender.id = :b AND m.recipient.id = :a)) " +
-           "AND (:itemId IS NULL OR m.relatedItemId = :itemId) " +
+           "AND ((:itemId IS NULL AND m.relatedItemId IS NULL) OR (:itemId IS NOT NULL AND m.relatedItemId = :itemId)) " +
            "ORDER BY m.sentAt ASC")
     List<ChatMessage> findConversation(@Param("a") Long userA, @Param("b") Long userB, @Param("itemId") Long itemId);
 
@@ -25,9 +25,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
            nativeQuery = true)
     List<Object[]> findConversationPartnerAndItemIds(@Param("uid") Long userId);
 
-    @Query("SELECT m FROM ChatMessage m WHERE m.recipient.id = :uid AND m.sender.id = :partnerId AND m.relatedItemId = :itemId AND m.read = false")
+    @Query("SELECT m FROM ChatMessage m WHERE m.recipient.id = :uid AND m.sender.id = :partnerId " +
+           "AND ((:itemId IS NULL AND m.relatedItemId IS NULL) OR (:itemId IS NOT NULL AND m.relatedItemId = :itemId)) " +
+           "AND m.read = false")
     List<ChatMessage> findUnreadFrom(@Param("uid") Long uid, @Param("partnerId") Long partnerId, @Param("itemId") Long itemId);
-
-    @Query("SELECT m FROM ChatMessage m WHERE ((m.sender.id = :a AND m.recipient.id = :b) OR (m.sender.id = :b AND m.recipient.id = :a)) AND m.relatedItemId IS NOT NULL ORDER BY m.sentAt ASC")
-    List<ChatMessage> findConversationWithItemId(@Param("a") Long a, @Param("b") Long b);
 }

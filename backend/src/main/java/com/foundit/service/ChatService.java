@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,11 +37,9 @@ public class ChatService {
         List<ChatMessage> messages = chatMessageRepository.findConversation(userAId, userBId, itemId);
 
         // Mark unread messages as read
-        if (itemId != null) {
-            List<ChatMessage> unread = chatMessageRepository.findUnreadFrom(userAId, userBId, itemId);
-            unread.forEach(m -> m.setRead(true));
-            chatMessageRepository.saveAll(unread);
-        }
+        List<ChatMessage> unread = chatMessageRepository.findUnreadFrom(userAId, userBId, itemId);
+        unread.forEach(m -> m.setRead(true));
+        chatMessageRepository.saveAll(unread);
 
         return messages.stream().map(this::toResponse).collect(Collectors.toList());
     }
@@ -51,17 +51,10 @@ public class ChatService {
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new EntityNotFoundException("Recipient not found"));
 
-        // Resolve which item this conversation is about
-        Long resolvedItemId = itemId;
-        if (resolvedItemId == null) {
-            List<ChatMessage> withItem = chatMessageRepository.findConversationWithItemId(senderId, recipientId);
-            if (!withItem.isEmpty()) resolvedItemId = withItem.get(0).getRelatedItemId();
-        }
-
         // senderIsAnonymous = true only if THIS sender posted that specific item anonymously
         boolean senderIsAnonymous = false;
-        if (resolvedItemId != null) {
-            senderIsAnonymous = itemRepository.findById(resolvedItemId)
+        if (itemId != null) {
+            senderIsAnonymous = itemRepository.findById(itemId)
                     .map(item -> item.getUser().getId().equals(senderId) && !item.isPublic())
                     .orElse(false);
         }
@@ -72,7 +65,7 @@ public class ChatService {
                 .content(content)
                 .read(false)
                 .senderIsAnonymous(senderIsAnonymous)
-                .relatedItemId(resolvedItemId)
+                .relatedItemId(itemId)
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
@@ -90,7 +83,7 @@ public class ChatService {
                         ? sender.getName()
                         : sender.getEmail().split("@")[0];
         String preview = content.length() > 60 ? content.substring(0, 60) + "..." : content;
-        notificationService.createChatNotification(recipient, sender.getId(), senderDisplayName, preview, resolvedItemId);
+        notificationService.createChatNotification(recipient, sender.getId(), senderDisplayName, preview, itemId);
 
         return response;
     }
@@ -146,14 +139,25 @@ public class ChatService {
                     .build());
         }
 
-        // Sort by most recent message
+        // Deduplicate:
+        // - Anonymous conversations: keyed by (partnerId, itemId) — each anonymous item is its own thread
+        // - Non-anonymous conversations: keyed by partnerId — one thread per person
         summaries.sort((a, b) -> {
             if (a.getLastMessageTime() == null) return 1;
             if (b.getLastMessageTime() == null) return -1;
             return b.getLastMessageTime().compareTo(a.getLastMessageTime());
         });
+        // Key by (partnerId, itemId) when there is an item — keeps each item's thread separate
+        // regardless of anonymity. Key by partnerId alone for direct (no-item) conversations.
+        Map<String, ConversationSummary> deduped = new LinkedHashMap<>();
+        for (ConversationSummary s : summaries) {
+            String key = s.getItemId() != null
+                    ? s.getPartnerId() + "-" + s.getItemId()
+                    : String.valueOf(s.getPartnerId());
+            deduped.putIfAbsent(key, s);
+        }
 
-        return summaries;
+        return new ArrayList<>(deduped.values());
     }
 
     private ChatMessageResponse toResponse(ChatMessage msg) {
