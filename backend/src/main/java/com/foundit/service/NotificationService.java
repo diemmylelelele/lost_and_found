@@ -64,13 +64,14 @@ public class NotificationService {
     }
 
     @Transactional
-    public void createChatNotification(User recipient, Long senderId, String senderName, String messagePreview) {
+    public void createChatNotification(User recipient, Long senderId, String senderName, String messagePreview, Long relatedItemId) {
         Notification notification = Notification.builder()
                 .user(recipient)
                 .match(null)
                 .message(messagePreview)
                 .chatSenderId(senderId)
                 .chatSenderName(senderName)
+                .relatedItemId(relatedItemId)
                 .status(NotificationStatus.UNREAD)
                 .build();
         Notification saved = notificationRepository.save(notification);

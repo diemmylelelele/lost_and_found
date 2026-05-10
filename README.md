@@ -93,3 +93,16 @@ Frontend runs at **http://localhost:5173**
 ### 4. Open the App
 
 Visit **http://localhost:5173** and register a new account to get started.
+
+---
+
+## Database Migrations
+
+If you are pulling new changes, some features require manually adding columns to the database. Run the following commands after pulling:
+
+```bash
+psql -h localhost -U admin -d founditdb -c "ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS sender_is_anonymous BOOLEAN DEFAULT FALSE;"
+psql -h localhost -U admin -d founditdb -c "ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS related_item_id BIGINT;"
+```
+
+> `IF NOT EXISTS` ensures the commands are safe to run even if the columns already exist.

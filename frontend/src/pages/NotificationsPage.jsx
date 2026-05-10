@@ -40,7 +40,12 @@ export default function NotificationsPage() {
     if (n.status === 'UNREAD') {
       await handleMarkRead(n.id)
     }
-    if (n.chatSenderId) navigate(`/chat/${n.chatSenderId}`)
+    if (n.chatSenderId) {
+      const chatUrl = n.relatedItemId
+        ? `/chat/${n.chatSenderId}?itemId=${n.relatedItemId}`
+        : `/chat/${n.chatSenderId}`
+      navigate(chatUrl)
+    }
     else if (n.lostItemId) navigate(`/items/${n.lostItemId}`)
     else if (n.foundItemId) navigate(`/items/${n.foundItemId}`)
   }

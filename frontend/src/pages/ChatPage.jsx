@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Send, Image, MessageSquare } from 'lucide-react'
 import { getConversations, getConversation, sendMessage } from '../api/messages'
 import { getUserById } from '../api/users'
@@ -33,6 +33,9 @@ function getAvatarColor(id) {
 
 export default function ChatPage() {
   const { partnerId } = useParams()
+  const [searchParams] = useSearchParams()
+  const itemId = searchParams.get('itemId')
+  const anonymousFromUrl = searchParams.get('anonymous') === 'true'
   const navigate = useNavigate()
   const { user } = useAuth()
 
@@ -52,41 +55,60 @@ export default function ChatPage() {
       .then(res => setConversations(res.data || []))
       .catch(() => {})
       .finally(() => setLoadingConvos(false))
+
+    const interval = setInterval(() => {
+      getConversations()
+        .then(res => setConversations(res.data || []))
+        .catch(() => {})
+    }, 3000)
+
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
     if (!partnerId) return
     setLoadingMessages(true)
-    getConversation(partnerId)
+    getConversation(partnerId, itemId)
       .then(res => setMessages(res.data || []))
       .catch(() => {})
       .finally(() => setLoadingMessages(false))
 
     const interval = setInterval(() => {
-      getConversation(partnerId)
+      getConversation(partnerId, itemId)
         .then(res => setMessages(res.data || []))
         .catch(() => {})
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [partnerId])
+  }, [partnerId, itemId])
 
   useEffect(() => {
     if (!partnerId) return
-    const partner = conversations.find(c => String(c.partnerId) === String(partnerId))
+
+    const partner = conversations.find(
+      c => String(c.partnerId) === String(partnerId) && String(c.itemId ?? '') === String(itemId ?? '')
+    )
     if (partner) {
       setActivePartner(partner)
-    } else {
-      // Not in conversation list yet — fetch user info directly
-      getUserById(partnerId)
-        .then(res => setActivePartner({
+      return
+    }
+
+    // Wait for conversations to finish loading before falling back to getUserById,
+    // otherwise a slow getUserById response can overwrite the correct anonymous state.
+    if (loadingConvos) return
+
+    let cancelled = false
+    getUserById(partnerId)
+      .then(res => {
+        if (!cancelled) setActivePartner({
           partnerId,
           partnerName: res.data.name || '',
           partnerEmail: res.data.email || '',
-        }))
-        .catch(() => setActivePartner({ partnerId, partnerName: '', partnerEmail: '' }))
-    }
-  }, [partnerId, conversations])
+        })
+      })
+      .catch(() => { if (!cancelled) setActivePartner({ partnerId, partnerName: '', partnerEmail: '' }) })
+    return () => { cancelled = true }
+  }, [partnerId, itemId, conversations, loadingConvos])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -97,12 +119,12 @@ export default function ChatPage() {
     if (!newMessage.trim() || !partnerId) return
     setSending(true)
     try {
-      const res = await sendMessage(partnerId, newMessage.trim())
+      const res = await sendMessage(partnerId, newMessage.trim(), itemId)
       setMessages(prev => [...prev, res.data || res])
       setNewMessage('')
-      // Update conversation list preview
+      // Update the matching conversation entry in the sidebar
       setConversations(prev => prev.map(c =>
-        String(c.partnerId) === String(partnerId)
+        String(c.partnerId) === String(partnerId) && String(c.itemId ?? '') === String(itemId ?? '')
           ? { ...c, lastMessage: newMessage.trim(), lastMessageTime: new Date().toISOString() }
           : c
       ))
@@ -112,12 +134,16 @@ export default function ChatPage() {
 
   const filteredConvos = conversations.filter(c => {
     const name = getDisplayName(c.partnerName, c.partnerEmail).toLowerCase()
-    const matchSearch = name.includes(search.toLowerCase())
+    const matchSearch = name.includes(search.toLowerCase()) ||
+      (c.itemName && c.itemName.toLowerCase().includes(search.toLowerCase()))
     const matchFilter = convoFilter === 'all' || c.unreadCount > 0
     return matchSearch && matchFilter
   })
 
-  const activePartnerName = activePartner
+  const partnerIsAnonymous = anonymousFromUrl || activePartner?.partnerIsAnonymous === true
+  const activePartnerName = partnerIsAnonymous
+    ? 'Anonymous Member'
+    : activePartner
     ? getDisplayName(activePartner.partnerName, activePartner.partnerEmail)
     : ''
 
@@ -183,11 +209,14 @@ export default function ChatPage() {
           ) : (
             filteredConvos.map(convo => {
               const name = getDisplayName(convo.partnerName, convo.partnerEmail)
-              const isActive = String(convo.partnerId) === String(partnerId)
+              const convoKey = `${convo.partnerId}-${convo.itemId ?? 'null'}`
+              const isActive = String(convo.partnerId) === String(partnerId) &&
+                String(convo.itemId ?? '') === String(itemId ?? '')
+              const chatUrl = `/chat/${convo.partnerId}${convo.itemId ? `?itemId=${convo.itemId}` : ''}${convo.partnerIsAnonymous ? (convo.itemId ? '&anonymous=true' : '?anonymous=true') : ''}`
               return (
                 <button
-                  key={convo.partnerId}
-                  onClick={() => navigate(`/chat/${convo.partnerId}`)}
+                  key={convoKey}
+                  onClick={() => navigate(chatUrl)}
                   className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${isActive ? 'bg-gray-50' : ''}`}
                 >
                   <div className="flex items-center gap-3">
@@ -209,6 +238,9 @@ export default function ChatPage() {
                           {timeAgo(convo.lastMessageTime)}
                         </span>
                       </div>
+                      {convo.itemName && (
+                        <p className="text-xs text-blue-500 truncate">{convo.itemName}</p>
+                      )}
                       <div className="flex items-center justify-between mt-0.5">
                         <p className="text-xs text-gray-500 truncate flex-1">
                           {convo.lastMessage || 'Start a conversation'}
@@ -246,7 +278,12 @@ export default function ChatPage() {
                   {activePartnerName.charAt(0).toUpperCase() || '?'}
                 </span>
               </div>
-              <span className="font-bold text-gray-900 text-base">{activePartnerName}</span>
+              <div>
+                <span className="font-bold text-gray-900 text-base">{activePartnerName}</span>
+                {activePartner?.itemName && (
+                  <p className="text-xs text-blue-500">{activePartner.itemName}</p>
+                )}
+              </div>
             </div>
 
             {/* Messages */}
