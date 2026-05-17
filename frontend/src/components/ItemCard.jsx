@@ -77,29 +77,48 @@ export default function ItemCard({ item: initialItem }) {
     ? 'Anonymous Member'
     : (reporterName || 'Unknown')
 
+  const hasPendingClaim = item.currentUserHasPendingClaim && !isClaimed
+
   const showChat = isAuthenticated && !isOwnItem && !isClaimed
-  const showClaim = isAuthenticated && !isOwnItem && isFound && !isClaimed && !item.claimantId
+  const showClaim =
+    isAuthenticated &&
+    !isOwnItem &&
+    isFound &&
+    !isClaimed &&
+    !hasPendingClaim
   const isLost = itemType?.toUpperCase() === 'LOST'
   const showRecoveredButton = isAuthenticated && isOwnItem && isLost && !isClaimed
 
   const handleClaimClick = async (e) => {
-    e.stopPropagation()
-    if (!isAuthenticated) { navigate('/login'); return }
-    if (valuable) {
-      navigate(`/claim/${id}`)
-      return
-    }
-    try {
-      setClaiming(true)
-      const res = await claimSimple(id)
-      setItem(res.data || res)
-    } catch {
-      // silently fail — user can retry from detail page
-    } finally {
-      setClaiming(false)
-    }
+  e.stopPropagation()
+
+  if (!isAuthenticated) {
+    navigate('/login')
+    return
   }
-    const handleRecoveredClick = async (e) => {
+
+  if (valuable) {
+    navigate(`/claim/${id}`)
+    return
+  }
+
+  try {
+    setClaiming(true)
+
+    const res = await claimSimple(id)
+
+    setItem({
+      ...(res.data || res),
+      currentUserHasPendingClaim: true,
+    })
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to send claim request.')
+  } finally {
+    setClaiming(false)
+  }
+}
+
+  const handleRecoveredClick = async (e) => {
     e.stopPropagation()
 
     if (!window.confirm('Mark this lost item as recovered?')) return
@@ -114,8 +133,6 @@ export default function ItemCard({ item: initialItem }) {
       setClaiming(false)
     }
   }
-
-  const hasPendingClaim = item.claimantId && !isClaimed
 
   const handleDelete = async (e) => {
     e.stopPropagation()
@@ -262,10 +279,15 @@ export default function ItemCard({ item: initialItem }) {
             >
               {claiming ? 'Updating...' : 'I got this item back'}
             </button>
-          ) : isOwnItem ? null
-
-          : hasPendingClaim && !isOwnItem ? (
-            <div className="px-6 py-2 text-sm font-semibold text-center rounded-full border" style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
+          ) : isOwnItem ? null : hasPendingClaim ? (
+            <div
+              className="px-6 py-2 text-sm font-semibold text-center rounded-full border"
+              style={{
+                color: '#F5A623',
+                backgroundColor: '#FEF3C7',
+                borderColor: '#FEF3C7',
+              }}
+            >
               Claim pending
             </div>
           ) : showClaim ? (

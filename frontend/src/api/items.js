@@ -13,6 +13,12 @@ export const getMyItems = () => api.get('/items/my')
 export const deleteItem = (id) => api.delete(`/items/${id}`)
 export const updateItem = (id, data) => api.put(`/items/${id}`, data)
 
+export const getItemClaimRequests = (id) =>
+  api.get(`/items/${id}/claims`)
+
+export const approveClaimRequest = (itemId, claimRequestId) =>
+  api.post(`/items/${itemId}/claims/${claimRequestId}/approve`)
+
 export const uploadImage = (file) => {
   const formData = new FormData()
   formData.append('file', file)

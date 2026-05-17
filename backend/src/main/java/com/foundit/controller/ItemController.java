@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.foundit.dto.ClaimRequestResponse;
 
 import java.util.List;
 
@@ -25,13 +26,26 @@ public class ItemController {
     public ResponseEntity<List<ItemResponse>> getItems(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String keyword) {
-        return ResponseEntity.ok(itemService.getItems(status, category, keyword));
+            @RequestParam(required = false) String keyword,
+            @AuthenticationPrincipal User currentUser) {
+
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
+
+        return ResponseEntity.ok(
+                itemService.getItems(status, category, keyword, currentUserId)
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemResponse> getItem(@PathVariable Long id) {
-        return ResponseEntity.ok(itemService.getItemById(id));
+    public ResponseEntity<ItemResponse> getItemById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
+
+        return ResponseEntity.ok(
+                itemService.getItemById(id, currentUserId)
+        );
     }
 
     @PostMapping("/lost")
@@ -109,4 +123,26 @@ public class ItemController {
         itemService.deleteItem(id, currentUser.getId());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/claims")
+    public ResponseEntity<List<ClaimRequestResponse>> getPendingClaimRequests(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+
+        return ResponseEntity.ok(
+                itemService.getPendingClaimRequests(id, currentUser.getId())
+        );
+    }
+
+    @PostMapping("/{id}/claims/{claimRequestId}/approve")
+    public ResponseEntity<ItemResponse> approveClaimRequest(
+            @PathVariable Long id,
+            @PathVariable Long claimRequestId,
+            @AuthenticationPrincipal User currentUser) {
+
+        return ResponseEntity.ok(
+                itemService.approveClaimRequest(id, claimRequestId, currentUser.getId())
+        );
+    }
+
 }

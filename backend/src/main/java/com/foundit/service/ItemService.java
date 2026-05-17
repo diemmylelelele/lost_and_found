@@ -17,6 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import com.foundit.dto.ClaimRequestResponse;
+import com.foundit.model.ClaimRequest;
+import com.foundit.model.ClaimRequestStatus;
+import com.foundit.repository.ClaimRequestRepository;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,6 +39,7 @@ public class ItemService {
     private final NotificationRepository notificationRepository;
     private final MatchingService matchingService;
     private final NotificationService notificationService;
+    private final ClaimRequestRepository claimRequestRepository;
 
     private static final List<String> VALUABLE_KEYWORDS = Arrays.asList(
             "phone", "laptop", "wallet", "smartwatch", "tablet", "airpod",
@@ -82,7 +87,7 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
-    public List<ItemResponse> getItems(String status, String category, String keyword) {
+    public List<ItemResponse> getItems(String status, String category, String keyword, Long currentUserId) {
         List<Item> items;
 
         if (StringUtils.hasText(keyword)) {
@@ -125,15 +130,16 @@ public class ItemService {
                     if (groupDiff != 0) return groupDiff;
                     return b.getDatePosted().compareTo(a.getDatePosted());
                 })
-                .map(this::toResponse)
+                .map(item -> toResponse(item, currentUserId))
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public ItemResponse getItemById(Long id) {
+    public ItemResponse getItemById(Long id, Long currentUserId) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + id));
-        return toResponse(item);
+
+        return toResponse(item, currentUserId);
     }
 
     @Transactional
@@ -172,6 +178,11 @@ public class ItemService {
         if (item.getStatus() == ItemStatus.CLAIMED) {
             throw new IllegalArgumentException("Item is already claimed");
         }
+
+        if (item.getItemType() != ItemStatus.FOUND) {
+            throw new IllegalArgumentException("Only found items can be claimed");
+        }
+
         if (item.getUser().getId().equals(claimantId)) {
             throw new IllegalArgumentException("You cannot claim your own item");
         }
@@ -179,14 +190,105 @@ public class ItemService {
         User claimant = userRepository.findById(claimantId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        item.setClaimantId(claimantId);
+        boolean alreadyPending = claimRequestRepository.existsByItemIdAndClaimantIdAndStatus(
+                itemId,
+                claimantId,
+                ClaimRequestStatus.PENDING
+        );
+
+        if (alreadyPending) {
+            throw new IllegalArgumentException("You already submitted a claim request for this item");
+        }
+
+        ClaimRequest claimRequest = ClaimRequest.builder()
+                .item(item)
+                .claimant(claimant)
+                .status(ClaimRequestStatus.PENDING)
+                .build();
+
+        claimRequestRepository.save(claimRequest);
+
+        notificationService.createClaimRequestNotification(
+                item.getUser(),
+                itemId,
+                claimant.getName(),
+                item.getName()
+        );
+
+        return toResponse(item, claimantId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClaimRequestResponse> getPendingClaimRequests(Long itemId, Long ownerId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));
+
+        if (!item.getUser().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("Only the finder can view claim requests");
+        }
+
+        return claimRequestRepository
+                .findByItemIdAndStatus(itemId, ClaimRequestStatus.PENDING)
+                .stream()
+                .map(this::toClaimRequestResponse)
+                .toList();
+    }
+
+    @Transactional
+    public ItemResponse approveClaimRequest(Long itemId, Long claimRequestId, Long ownerId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));
+
+        if (!item.getUser().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("Only the finder can approve this claim");
+        }
+
+        if (item.getStatus() == ItemStatus.CLAIMED) {
+            throw new IllegalArgumentException("Item is already claimed");
+        }
+
+        ClaimRequest approvedRequest = claimRequestRepository.findById(claimRequestId)
+                .orElseThrow(() -> new EntityNotFoundException("Claim request not found"));
+
+        if (!approvedRequest.getItem().getId().equals(itemId)) {
+            throw new IllegalArgumentException("Claim request does not belong to this item");
+        }
+
+        approvedRequest.setStatus(ClaimRequestStatus.APPROVED);
+        claimRequestRepository.save(approvedRequest);
+
+        List<ClaimRequest> pendingRequests =
+                claimRequestRepository.findByItemIdAndStatus(itemId, ClaimRequestStatus.PENDING);
+
+        for (ClaimRequest request : pendingRequests) {
+            if (!request.getId().equals(claimRequestId)) {
+                request.setStatus(ClaimRequestStatus.REJECTED);
+            }
+        }
+
+        claimRequestRepository.saveAll(pendingRequests);
+
+        item.setStatus(ItemStatus.CLAIMED);
+        item.setClaimantId(approvedRequest.getClaimant().getId());
+
         Item saved = itemRepository.save(item);
 
-        // Notify the finder (item owner)
-        notificationService.createClaimRequestNotification(item.getUser(), itemId, claimant.getName(), item.getName());
-
-        return toResponse(saved);
+        return toResponse(saved, ownerId);
     }
+
+    private ClaimRequestResponse toClaimRequestResponse(ClaimRequest request) {
+    User claimant = request.getClaimant();
+
+    return ClaimRequestResponse.builder()
+            .id(request.getId())
+            .itemId(request.getItem().getId())
+            .claimantId(claimant.getId())
+            .claimantName(claimant.getName())
+            .claimantEmail(claimant.getEmail())
+            .status(request.getStatus())
+            .createdAt(request.getCreatedAt())
+            .build();
+}
 
     /**
      * Non-valuable item: finder (owner) approves a pending claim → mark CLAIMED.
@@ -345,7 +447,28 @@ public class ItemService {
     }
 
     public ItemResponse toResponse(Item item) {
+    return toResponse(item, null);
+}
+
+    public ItemResponse toResponse(Item item, Long currentUserId) {
         boolean pub = item.isPublic();
+
+        boolean currentUserHasPendingClaim = false;
+
+        if (currentUserId != null) {
+            currentUserHasPendingClaim =
+                    claimRequestRepository.existsByItemIdAndClaimantIdAndStatus(
+                            item.getId(),
+                            currentUserId,
+                            ClaimRequestStatus.PENDING
+                    );
+        }
+
+        int pendingClaimCount =
+                claimRequestRepository
+                        .findByItemIdAndStatus(item.getId(), ClaimRequestStatus.PENDING)
+                        .size();
+
         return ItemResponse.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -363,9 +486,12 @@ public class ItemService {
                 .claimantId(item.getClaimantId())
                 .claimantName(item.getClaimantId() != null
                         ? userRepository.findById(item.getClaimantId())
-                                .map(User::getName).orElse(null)
+                                .map(User::getName)
+                                .orElse(null)
                         : null)
                 .isPublic(pub)
+                .currentUserHasPendingClaim(currentUserHasPendingClaim)
+                .pendingClaimCount(pendingClaimCount)
                 .build();
     }
     @Transactional

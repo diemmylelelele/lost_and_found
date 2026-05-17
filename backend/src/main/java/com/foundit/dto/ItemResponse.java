@@ -32,4 +32,7 @@ public class ItemResponse {
     private String claimantName;
     @JsonProperty("isPublic")
     private boolean isPublic;
+    private Boolean currentUserHasPendingClaim;
+    private Integer pendingClaimCount;
 }
+

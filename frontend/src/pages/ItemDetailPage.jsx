@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import { MapPin } from 'lucide-react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import LoadingSpinner from '../components/LoadingSpinner'
+
 import {
   getItem,
   claimSimple,
   approveClaim,
   markLostItemRecovered,
+  getItemClaimRequests,
+  approveClaimRequest,
 } from '../api/items'
-import { useAuth } from '../context/AuthContext'
-import LoadingSpinner from '../components/LoadingSpinner'
 
 const VALUABLE_KEYWORDS = [
   'phone', 'laptop', 'wallet', 'smartwatch', 'tablet', 'airpod',
@@ -35,6 +38,10 @@ export default function ItemDetailPage() {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
+  const [claimRequests, setClaimRequests] = useState([])
+  const [showClaimList, setShowClaimList] = useState(false)
+  const [claimListMode, setClaimListMode] = useState(null)
+
   useEffect(() => {
     const fetchItem = async () => {
       try {
@@ -53,23 +60,74 @@ export default function ItemDetailPage() {
     fetchItem()
   }, [id])
 
-  const handleSimpleClaim = async () => {
-    if (!window.confirm('Send a claim request to the finder?')) return
+  const openClaimRequestList = async (mode) => {
+  try {
+    setActioning(true)
+    setError('')
 
-    try {
-      setActioning(true)
-      setError('')
-      setSuccessMsg('')
+    const res = await getItemClaimRequests(id)
+    const requests = res.data || res || []
 
-      const res = await claimSimple(id)
-      setItem(res.data || res)
-      setSuccessMsg('Claim request sent! The finder has been notified.')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send claim request.')
-    } finally {
-      setActioning(false)
+    if (requests.length === 0) {
+      setError('No claim requests found for this item.')
+      return
     }
+
+    if (requests.length === 1) {
+      const onlyRequest = requests[0]
+
+      if (mode === 'verify') {
+        if (
+          !window.confirm(
+            `Approve ${onlyRequest.claimantName || 'this user'} as the owner of this item?`
+          )
+        ) {
+          return
+        }
+
+        const approved = await approveClaimRequest(id, onlyRequest.id)
+        setItem(approved.data || approved)
+        setSuccessMsg('Item marked as claimed.')
+      }
+
+      if (mode === 'chat') {
+        navigate(`/chat/${onlyRequest.claimantId}?itemId=${id}`)
+      }
+
+      return
+    }
+
+    setClaimRequests(requests)
+    setClaimListMode(mode)
+    setShowClaimList(true)
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to load claim requests.')
+  } finally {
+    setActioning(false)
   }
+}
+  const handleSimpleClaim = async () => {
+  if (!window.confirm('Send a claim request to the finder?')) return
+
+  try {
+    setActioning(true)
+    setError('')
+    setSuccessMsg('')
+
+    const res = await claimSimple(id)
+
+    setItem({
+      ...(res.data || res),
+      currentUserHasPendingClaim: true,
+    })
+
+    setSuccessMsg('Claim request sent! The finder has been notified.')
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to send claim request.')
+  } finally {
+    setActioning(false)
+  }
+}
 
   const handleRecoveredClick = async () => {
     if (!window.confirm('Mark this lost item as claimed?')) return
@@ -162,17 +220,24 @@ export default function ItemDetailPage() {
   const isClaimed = item.status === 'CLAIMED'
   const valuable = isValuableItem(item.name)
 
-  const hasPendingClaim = isFound && isOwner && item.claimantId && !isClaimed
-  const userIsClaimant = user && String(user.id) === String(item.claimantId)
+  const hasPendingClaim =
+  item.currentUserHasPendingClaim && !isClaimed
 
-  const showVerifyClaimBtn =
-    valuable && isFound && !isOwner && !isClaimed && !userIsClaimant
-
-  const showVerifySubmitted =
-    valuable && isFound && !isOwner && !isClaimed && userIsClaimant
+  const hasAnyPendingClaims =
+    isOwner && isFound && !isClaimed && item.pendingClaimCount > 0
 
   const showSimpleClaimBtn =
-    !valuable && isFound && !isOwner && !isClaimed && !item.claimantId
+    !valuable &&
+    isFound &&
+    !isOwner &&
+    !isClaimed &&
+    !hasPendingClaim
+
+  const userIsClaimant = user && String(user.id) === String(item.claimantId)
+
+  const showVerifyClaimBtn =  valuable && isFound && !isOwner && !isClaimed && !hasPendingClaim
+
+  const showVerifySubmitted =   valuable && isFound && !isOwner && !isClaimed && hasPendingClaim
 
   const hidePrivateDetails =
     valuable && isFound && !isOwner && !isClaimed
@@ -430,24 +495,26 @@ export default function ItemDetailPage() {
                   )}
                 </div>
               </div>
-            ) : isOwner && hasPendingClaim ? (
+            ) : hasAnyPendingClaims ? (
               <div className="flex flex-col gap-3">
                 <div className="p-3 bg-gray-50 text-gray-500 rounded-lg text-sm text-center">
-                  There is a high chance this item belongs to the claimer. Verify to confirm or chat to discuss.
+                  {item.pendingClaimCount === 1
+                    ? 'There is 1 claim request for this item. Verify to confirm or chat to discuss.'
+                    : `There are ${item.pendingClaimCount} claim requests for this item. Choose a claimant to verify or chat.`}
                 </div>
 
                 <div className="flex justify-center gap-4">
                   <button
-                    onClick={handleApproveClaim}
+                    onClick={() => openClaimRequestList('verify')}
                     disabled={actioning}
                     className="w-36 h-11 rounded-full text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: '#F5A623' }}
                   >
-                    {actioning ? 'Verifying...' : 'Verify'}
+                    {actioning ? 'Loading...' : 'Verify'}
                   </button>
 
                   <button
-                    onClick={() => navigate(`/chat/${item.claimantId}`)}
+                    onClick={() => openClaimRequestList('chat')}
                     className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: '#03045E' }}
                   >
@@ -519,6 +586,33 @@ export default function ItemDetailPage() {
                   Chat
                 </button>
               </div>
+            ) : hasPendingClaim && !isOwner ? (
+                <div className="flex flex-col gap-3">
+                  <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
+                    You submitted a claim request for this item
+                  </div>
+
+                  <div className="flex justify-center gap-4">
+                    <div
+                      className="w-36 h-11 rounded-full text-sm font-semibold flex items-center justify-center border cursor-not-allowed"
+                      style={{
+                        color: '#F5A623',
+                        backgroundColor: '#FEF3C7',
+                        borderColor: '#FEF3C7',
+                      }}
+                    >
+                      Claim Pending
+                    </div>
+
+                    <button
+                      onClick={handleChat}
+                      className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: '#03045E' }}
+                    >
+                      Chat
+                    </button>
+                  </div>
+                </div>
             ) : showSimpleClaimBtn ? (
               <div className="flex justify-center gap-4">
                 <button
@@ -538,35 +632,6 @@ export default function ItemDetailPage() {
                   Chat
                 </button>
               </div>
-            ) : !isOwner && item.claimantId && !isClaimed ? (
-              <div className="flex flex-col gap-3">
-                <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
-                  {user && String(user.id) === String(item.claimantId)
-                    ? 'You are sending a request to claim this item'
-                    : `${item.claimantName || 'Someone'} is sending a request to claim this item`}
-                </div>
-
-                <div className="flex justify-center gap-4">
-                  <div
-                    className="w-36 h-11 rounded-full text-sm font-semibold flex items-center justify-center border cursor-not-allowed"
-                    style={{
-                      color: '#F5A623',
-                      backgroundColor: '#FEF3C7',
-                      borderColor: '#FEF3C7',
-                    }}
-                  >
-                    Claim Pending
-                  </div>
-
-                  <button
-                    onClick={handleChat}
-                    className="w-36 h-11 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#03045E' }}
-                  >
-                    Chat
-                  </button>
-                </div>
-              </div>
             ) : (
               <div className="flex justify-center gap-4">
                 <button
@@ -581,6 +646,69 @@ export default function ItemDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+      {/* Claim request list modal */}
+      {showClaimList && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">
+              {claimListMode === 'verify'
+                ? 'Choose the correct claimant'
+                : 'Choose a claimant to chat'}
+            </h2>
+
+            <div className="space-y-3">
+              {claimRequests.map((request) => (
+                <button
+                  key={request.id}
+                  onClick={async () => {
+                    if (claimListMode === 'chat') {
+                      navigate(`/chat/${request.claimantId}?itemId=${id}`)
+                      return
+                    }
+
+                    if (
+                      !window.confirm(
+                        `Approve ${request.claimantName || 'this user'} as the owner of this item?`
+                      )
+                    ) {
+                      return
+                    }
+
+                    try {
+                      setActioning(true)
+
+                      const res = await approveClaimRequest(id, request.id)
+                      setItem(res.data || res)
+                      setShowClaimList(false)
+                      setSuccessMsg('Item marked as claimed.')
+                    } catch (err) {
+                      setError(err.response?.data?.message || 'Failed to approve claim.')
+                    } finally {
+                      setActioning(false)
+                    }
+                  }}
+                  className="w-full p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left"
+                >
+                  <p className="font-semibold text-gray-900">
+                    {request.claimantName || 'Unknown user'}
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    {request.claimantEmail}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowClaimList(false)}
+              className="mt-5 w-full h-10 rounded-full bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>   
   )
 }
