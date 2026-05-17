@@ -278,11 +278,20 @@ export default function ChatPage() {
                   {activePartnerName.charAt(0).toUpperCase() || '?'}
                 </span>
               </div>
-              <div>
+              <div className="flex flex-col">
                 <span className="font-bold text-gray-900 text-base">{activePartnerName}</span>
                 {activePartner?.itemName && (
-                  <p className="text-xs text-blue-500">{activePartner.itemName}</p>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const targetItemId = activePartner?.itemId || itemId
+                    if (targetItemId) navigate(`/items/${targetItemId}`)
+                  }}
+                  className="text-xs text-blue-500 hover:underline text-left"
+                >
+                  {activePartner.itemName}
+                </button>
+              )}
               </div>
             </div>
 
