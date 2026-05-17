@@ -119,3 +119,28 @@ psql -h localhost -U admin -d founditdb -c "ALTER TABLE chat_messages ADD COLUMN
 ```
 
 > `IF NOT EXISTS` ensures the commands are safe to run even if the columns already exist.
+
+
+
+
+# Update the database
+
+```bash
+CREATE TABLE IF NOT EXISTS claim_requests (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMP,
+    status VARCHAR(255) CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    claimant_id BIGINT NOT NULL,
+    item_id BIGINT NOT NULL,
+
+    CONSTRAINT fk_claim_requests_claimant
+        FOREIGN KEY (claimant_id) REFERENCES users(id),
+
+    CONSTRAINT fk_claim_requests_item
+        FOREIGN KEY (item_id) REFERENCES items(id),
+
+    CONSTRAINT unique_item_claimant
+        UNIQUE (item_id, claimant_id)
+);
+
+```
