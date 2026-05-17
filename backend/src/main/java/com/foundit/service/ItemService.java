@@ -311,6 +311,40 @@ public class ItemService {
         return toResponse(saved);
     }
 
+    @Transactional
+    public ItemResponse approveMatchClaim(Long foundItemId, Long lostItemId, Long finderId) {
+        Item foundItem = itemRepository.findById(foundItemId)
+                .orElseThrow(() -> new EntityNotFoundException("Found item not found with id: " + foundItemId));
+
+        Item lostItem = itemRepository.findById(lostItemId)
+                .orElseThrow(() -> new EntityNotFoundException("Lost item not found with id: " + lostItemId));
+
+        if (foundItem.getItemType() != ItemStatus.FOUND) {
+            throw new IllegalArgumentException("The selected found item is invalid");
+        }
+
+        if (lostItem.getItemType() != ItemStatus.LOST) {
+            throw new IllegalArgumentException("The selected lost item is invalid");
+        }
+
+        if (!foundItem.getUser().getId().equals(finderId)) {
+            throw new IllegalArgumentException("Only the finder can verify this match");
+        }
+
+        if (foundItem.getStatus() == ItemStatus.CLAIMED) {
+            throw new IllegalArgumentException("This found item is already claimed");
+        }
+
+        Long claimantId = lostItem.getUser().getId();
+
+        foundItem.setStatus(ItemStatus.CLAIMED);
+        foundItem.setClaimantId(claimantId);
+
+        Item saved = itemRepository.save(foundItem);
+
+        return toResponse(saved, finderId);
+    }
+
     /**
      * Valuable item: claimer submits verification form → run matching engine.
      * Score >= 50 → CLAIMED + notify both; else → notify claimer only.

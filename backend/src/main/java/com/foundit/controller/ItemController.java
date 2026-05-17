@@ -118,6 +118,16 @@ public class ItemController {
                 itemService.markLostItemAsRecovered(id, currentUser.getId())
         );
     }
+    @PostMapping("/{foundItemId}/match/{lostItemId}/approve")
+    public ResponseEntity<ItemResponse> approveMatchClaim(
+            @PathVariable Long foundItemId,
+            @PathVariable Long lostItemId,
+            @AuthenticationPrincipal User currentUser) {
+
+        return ResponseEntity.ok(
+                itemService.approveMatchClaim(foundItemId, lostItemId, currentUser.getId())
+        );
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(
