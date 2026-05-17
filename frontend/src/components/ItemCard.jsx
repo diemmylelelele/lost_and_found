@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Package, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { claimSimple, deleteItem } from '../api/items'
+import { claimSimple, deleteItem, markLostItemRecovered } from '../api/items'
 
 const VALUABLE_KEYWORDS = [
   'phone', 'laptop', 'wallet', 'smartwatch', 'tablet', 'airpod',
@@ -79,6 +79,8 @@ export default function ItemCard({ item: initialItem }) {
 
   const showChat = isAuthenticated && !isOwnItem && !isClaimed
   const showClaim = isAuthenticated && !isOwnItem && isFound && !isClaimed && !item.claimantId
+  const isLost = itemType?.toUpperCase() === 'LOST'
+  const showRecoveredButton = isAuthenticated && isOwnItem && isLost && !isClaimed
 
   const handleClaimClick = async (e) => {
     e.stopPropagation()
@@ -93,6 +95,21 @@ export default function ItemCard({ item: initialItem }) {
       setItem(res.data || res)
     } catch {
       // silently fail — user can retry from detail page
+    } finally {
+      setClaiming(false)
+    }
+  }
+    const handleRecoveredClick = async (e) => {
+    e.stopPropagation()
+
+    if (!window.confirm('Mark this lost item as recovered?')) return
+
+    try {
+      setClaiming(true)
+      const res = await markLostItemRecovered(id)
+      setItem(res.data || res)
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update item status.')
     } finally {
       setClaiming(false)
     }
@@ -226,10 +243,27 @@ export default function ItemCard({ item: initialItem }) {
         {/* Action button */}
         <div className="flex justify-center mt-auto pt-2">
           {isClaimed ? (
-            <div className="px-6 py-2 text-sm font-semibold text-center rounded-full border" style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
+            <div
+              className="px-6 py-2 text-sm font-semibold text-center rounded-full border"
+              style={{
+                color: '#F5A623',
+                backgroundColor: '#FEF3C7',
+                borderColor: '#FEF3C7',
+              }}
+            >
               Claimed
             </div>
+          ) : showRecoveredButton ? (
+            <button
+              onClick={handleRecoveredClick}
+              disabled={claiming}
+              className="px-5 py-2 text-sm font-semibold text-white rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
+              style={{ backgroundColor: '#F5A623' }}
+            >
+              {claiming ? 'Updating...' : 'I got this item back'}
+            </button>
           ) : isOwnItem ? null
+
           : hasPendingClaim && !isOwnItem ? (
             <div className="px-6 py-2 text-sm font-semibold text-center rounded-full border" style={{ color: '#F5A623', backgroundColor: '#FEF3C7', borderColor: '#FEF3C7' }}>
               Claim pending

@@ -92,6 +92,15 @@ public class ItemController {
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(itemService.updateItem(id, request, currentUser.getId()));
     }
+    @PostMapping("/{id}/recover")
+    public ResponseEntity<ItemResponse> markLostItemAsRecovered(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+
+        return ResponseEntity.ok(
+                itemService.markLostItemAsRecovered(id, currentUser.getId())
+        );
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(

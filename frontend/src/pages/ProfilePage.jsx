@@ -183,7 +183,7 @@ export default function ProfilePage() {
 
   return (
     <div className="h-[calc(100vh-64px)] bg-gray-50 overflow-hidden">
-  <div className="max-w-7xl mx-auto px-6 py-4 flex gap-6 items-start h-full">
+    <div className="max-w-7xl mx-auto px-6 py-4 flex gap-6 items-start h-full">
 
         {/* Left — profile card */}
         <div className="w-96 flex-shrink-0 h-full bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">

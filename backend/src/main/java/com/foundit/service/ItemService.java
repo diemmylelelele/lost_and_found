@@ -368,4 +368,38 @@ public class ItemService {
                 .isPublic(pub)
                 .build();
     }
+    @Transactional
+    public ItemResponse markLostItemAsRecovered(Long itemId, Long ownerId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));
+
+        if (!item.getUser().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("You can only mark your own item as recovered");
+        }
+
+        if (item.getItemType() != ItemStatus.LOST) {
+            throw new IllegalArgumentException("Only lost items can be marked as recovered");
+        }
+
+        if (item.getStatus() == ItemStatus.CLAIMED) {
+            throw new IllegalArgumentException("Item is already claimed");
+        }
+
+        item.setStatus(ItemStatus.CLAIMED);
+
+        Item saved = itemRepository.save(item);
+
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        userHistoryRepository.save(
+                UserHistory.builder()
+                        .user(owner)
+                        .item(saved)
+                        .actionType("MARKED_LOST_ITEM_RECOVERED")
+                        .build()
+        );
+
+        return toResponse(saved);
+    }
 }
