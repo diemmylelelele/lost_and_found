@@ -141,13 +141,13 @@ export default function ItemCard({ item: initialItem }) {
                 <>
                   <button
                     onClick={() => { setMenuOpen(false); navigate(`/items/${id}/edit`) }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <Pencil size={13} /> Edit
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <Trash2 size={13} /> Delete
                   </button>

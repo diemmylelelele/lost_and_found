@@ -182,11 +182,11 @@ export default function ProfilePage() {
   if (loading) return <div className="flex justify-center py-20"><LoadingSpinner /></div>
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex gap-6 items-start">
+    <div className="h-[calc(100vh-64px)] bg-gray-50 overflow-hidden">
+  <div className="max-w-7xl mx-auto px-6 py-4 flex gap-6 items-start h-full">
 
         {/* Left — profile card */}
-        <div className="w-96 flex-shrink-0 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div className="w-96 flex-shrink-0 h-full bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
           {/* Banner */}
           <div className="h-28 bg-white" />
 
@@ -199,12 +199,12 @@ export default function ProfilePage() {
               }
             </div>
             <h2 className="text-base font-semibold text-gray-900 text-center">{displayName}</h2>
-            <p className="text-xs text-gray-400 text-center mt-0.5 mb-5">{displayEmail}</p>
+            <p className="text-xs text-gray-400 text-center mt-0.5 mb-8">{displayEmail}</p>
 
             {/* Edit button */}
             <button
               onClick={openEdit}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-full text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors mb-5"
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-full text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors mb-8"
             >
               <User size={14} />
               Edit Profile
@@ -231,7 +231,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Right — record history */}
-        <div className="flex-1">
+        <div className="flex-1 h-full flex flex-col min-h-0">
           {/* Title */}
           <div className="mb-4">
             <h3 className="text-xl font-bold text-gray-900">My Activity</h3>
@@ -250,7 +250,7 @@ export default function ProfilePage() {
               placeholder="Search your reported items (e.g., 'MacBook', 'Keys')..."
               className="flex-1 text-sm outline-none bg-transparent text-gray-600 placeholder-gray-400"
             />
-            <div className="flex items-center gap-1 ml-3 pl-3 border-l border-gray-200">
+            <div className="flex h-full items-center gap-1 ml-3 pl-3 border-l border-gray-200">
               {['All', 'Found', 'Lost'].map(opt => (
                 <button
                   key={opt}
@@ -266,7 +266,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Items list */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100 flex-1 overflow-y-auto min-h-0">
             {filteredItems.length === 0 ? (
               <p className="text-sm text-gray-400 py-10 text-center">No items found.</p>
             ) : (
