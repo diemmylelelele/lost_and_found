@@ -4,6 +4,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 
+
 import {
   getItem,
   claimSimple,
@@ -11,6 +12,7 @@ import {
   markLostItemRecovered,
   getItemClaimRequests,
   approveClaimRequest,
+  approveMatchClaim,
 } from '../api/items'
 
 const VALUABLE_KEYWORDS = [
@@ -87,7 +89,8 @@ export default function ItemDetailPage() {
 
         const approved = await approveClaimRequest(id, onlyRequest.id)
         setItem(approved.data || approved)
-        // setSuccessMsg('Item marked as claimed.')
+        setError('')
+        setShowClaimList(false)
       }
 
       if (mode === 'chat') {
@@ -132,7 +135,7 @@ export default function ItemDetailPage() {
     try {
       setUpdatingStatus(true)
       setError('')
-      setSuccessMsg('')
+      // setSuccessMsg('')
 
       const res = await markLostItemRecovered(id)
       setItem(res.data || res)
@@ -150,7 +153,7 @@ export default function ItemDetailPage() {
     try {
       setActioning(true)
       setError('')
-      setSuccessMsg('')
+      // setSuccessMsg('')
 
       const res = await approveClaim(id)
       setItem(res.data || res)
@@ -169,21 +172,24 @@ export default function ItemDetailPage() {
   }
 
   const handleFinderVerify = async () => {
-    if (!window.confirm('Confirm this match and mark your found item as claimed?')) return
+  if (!window.confirm('Confirm this match and mark your found item as claimed?')) return
 
-    try {
-      setActioning(true)
-      setError('')
-      // setSuccessMsg('')
+  try {
+    setActioning(true)
+    setError('')
 
-      await approveClaim(verifyFoundItemId)
-      navigate('/')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to verify.')
-    } finally {
-      setActioning(false)
-    }
+    const res = await approveMatchClaim(verifyFoundItemId, id)
+
+    setItem(res.data || res)
+    setError('')
+
+    navigate(`/items/${verifyFoundItemId}`)
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to verify match.')
+  } finally {
+    setActioning(false)
   }
+}
 
   if (loading) {
     return (
@@ -422,12 +428,11 @@ export default function ItemDetailPage() {
               </div>
             )}
 
-            {/* Feedback messages */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+            {error && !isClaimed && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
             {/* {successMsg && (
               <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
@@ -466,7 +471,9 @@ export default function ItemDetailPage() {
                 <div className="p-3 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
                   {lostItemRecovered
                     ? recoveredMessage
-                    : `This item has been claimed by ${item.claimantName || 'someone'}`}
+                    : item.claimantName
+                      ? `This item has been claimed by ${item.claimantName}`
+                      : 'This item has been claimed'}
                 </div>
 
                 <div className="flex justify-center gap-4">
@@ -676,8 +683,9 @@ export default function ItemDetailPage() {
 
                       const res = await approveClaimRequest(id, request.id)
                       setItem(res.data || res)
+                      setError('')
                       setShowClaimList(false)
-                      setSuccessMsg('Item marked as claimed.')
+                      // setSuccessMsg('Item marked as claimed.')
                     } catch (err) {
                       setError(err.response?.data?.message || 'Failed to approve claim.')
                     } finally {

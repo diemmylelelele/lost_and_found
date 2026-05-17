@@ -19,6 +19,9 @@ export const getItemClaimRequests = (id) =>
 export const approveClaimRequest = (itemId, claimRequestId) =>
   api.post(`/items/${itemId}/claims/${claimRequestId}/approve`)
 
+export const approveMatchClaim = (foundItemId, lostItemId) =>
+  api.post(`/items/${foundItemId}/match/${lostItemId}/approve`)
+
 export const uploadImage = (file) => {
   const formData = new FormData()
   formData.append('file', file)
