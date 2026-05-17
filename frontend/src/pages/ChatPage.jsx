@@ -281,17 +281,29 @@ export default function ChatPage() {
               <div className="flex flex-col">
                 <span className="font-bold text-gray-900 text-base">{activePartnerName}</span>
                 {activePartner?.itemName && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const targetItemId = activePartner?.itemId || itemId
-                    if (targetItemId) navigate(`/items/${targetItemId}`)
-                  }}
-                  className="text-xs text-blue-500 hover:underline text-left"
-                >
-                  {activePartner.itemName}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const currentConversation = conversations.find(
+                    c =>
+                      String(c.partnerId) === String(partnerId) &&
+                      String(c.itemName) === String(activePartner.itemName)
+                  )
+
+                  const targetItemId =
+                    activePartner?.itemId ||
+                    currentConversation?.itemId ||
+                    itemId
+
+                  if (targetItemId) {
+                    navigate(`/items/${targetItemId}`)
+                  }
+                }}
+                className="text-xs text-blue-500 hover:underline text-left cursor-pointer mt-0.5"
+              >
+                {activePartner.itemName}
+              </button>
+            )}
               </div>
             </div>
 
