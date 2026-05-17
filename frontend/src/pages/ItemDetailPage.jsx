@@ -36,7 +36,7 @@ export default function ItemDetailPage() {
   const [actioning, setActioning] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [error, setError] = useState('')
-  const [successMsg, setSuccessMsg] = useState('')
+  // const [successMsg, setSuccessMsg] = useState('')
 
   const [claimRequests, setClaimRequests] = useState([])
   const [showClaimList, setShowClaimList] = useState(false)
@@ -87,7 +87,7 @@ export default function ItemDetailPage() {
 
         const approved = await approveClaimRequest(id, onlyRequest.id)
         setItem(approved.data || approved)
-        setSuccessMsg('Item marked as claimed.')
+        // setSuccessMsg('Item marked as claimed.')
       }
 
       if (mode === 'chat') {
@@ -112,7 +112,6 @@ export default function ItemDetailPage() {
   try {
     setActioning(true)
     setError('')
-    setSuccessMsg('')
 
     const res = await claimSimple(id)
 
@@ -120,8 +119,6 @@ export default function ItemDetailPage() {
       ...(res.data || res),
       currentUserHasPendingClaim: true,
     })
-
-    setSuccessMsg('Claim request sent! The finder has been notified.')
   } catch (err) {
     setError(err.response?.data?.message || 'Failed to send claim request.')
   } finally {
@@ -157,7 +154,7 @@ export default function ItemDetailPage() {
 
       const res = await approveClaim(id)
       setItem(res.data || res)
-      setSuccessMsg('Item marked as claimed!')
+      // setSuccessMsg('Item marked as claimed!')
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to approve claim.')
     } finally {
@@ -177,7 +174,7 @@ export default function ItemDetailPage() {
     try {
       setActioning(true)
       setError('')
-      setSuccessMsg('')
+      // setSuccessMsg('')
 
       await approveClaim(verifyFoundItemId)
       navigate('/')
@@ -432,11 +429,11 @@ export default function ItemDetailPage() {
               </div>
             )}
 
-            {successMsg && (
+            {/* {successMsg && (
               <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
                 {successMsg}
               </div>
-            )}
+            )} */}
 
             {/* Action buttons — below description */}
             {verifyFoundItemId && !isClaimed ? (
