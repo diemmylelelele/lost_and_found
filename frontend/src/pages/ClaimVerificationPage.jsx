@@ -130,7 +130,7 @@ export default function ClaimVerificationPage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold mb-2" style={{ color: '#03045E' }}>No Match Found</h2>
-          <p className="text-gray-500 mb-6 text-sm">Your description did not match the item record. Please try again with more accurate details.</p>
+          <p className="text-gray-500 mb-6 text-sm">Your description did not match the item record. This might not be the right item.</p>
           <div className="flex justify-center gap-4">
             <button
               onClick={() => setResult(null)}
