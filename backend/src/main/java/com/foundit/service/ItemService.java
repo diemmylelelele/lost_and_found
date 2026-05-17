@@ -1,5 +1,5 @@
 package com.foundit.service;
-
+import com.foundit.dto.ClaimVerificationResponse;
 import com.foundit.dto.ClaimVerificationRequest;
 import com.foundit.dto.ItemRequest;
 import com.foundit.dto.ItemResponse;
@@ -316,13 +316,14 @@ public class ItemService {
      * Score >= 50 → CLAIMED + notify both; else → notify claimer only.
      */
     @Transactional
-    public ItemResponse verifyAndClaim(Long itemId, ClaimVerificationRequest req, Long claimantId) {
+    public ClaimVerificationResponse verifyAndClaim(Long itemId, ClaimVerificationRequest req, Long claimantId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item not found with id: " + itemId));
 
         if (item.getStatus() == ItemStatus.CLAIMED) {
             throw new IllegalArgumentException("Item is already claimed");
         }
+
         if (item.getUser().getId().equals(claimantId)) {
             throw new IllegalArgumentException("You cannot claim your own item");
         }
@@ -334,20 +335,46 @@ public class ItemService {
         boolean matched = score >= 50;
 
         if (matched) {
-            // Do NOT mark as CLAIMED yet — let the finder verify first
-            item.setClaimantId(claimantId);
-            itemRepository.save(item);
+            // Create pending claim request instead of directly claiming
+            boolean alreadyPending = claimRequestRepository.existsByItemIdAndClaimantIdAndStatus(
+                    itemId,
+                    claimantId,
+                    ClaimRequestStatus.PENDING
+            );
 
-            // Notify claimer: high chance of match, contact finder
+            if (!alreadyPending) {
+                ClaimRequest claimRequest = ClaimRequest.builder()
+                        .item(item)
+                        .claimant(claimer)
+                        .status(ClaimRequestStatus.PENDING)
+                        .build();
+
+                claimRequestRepository.save(claimRequest);
+            }
+
             notificationService.createClaimResultNotification(claimer, itemId, true);
-            // Notify finder: someone's claim matched, contact them
-            notificationService.createClaimMatchNotificationForFinder(item.getUser(), itemId, claimer.getName());
-        } else {
-            // Notify claimer: no match
-            notificationService.createClaimResultNotification(claimer, itemId, false);
+            notificationService.createClaimMatchNotificationForFinder(
+                    item.getUser(),
+                    itemId,
+                    claimer.getName()
+            );
+
+            return ClaimVerificationResponse.builder()
+                    .matched(true)
+                    .score(score)
+                    .message("High chance match. The finder has been notified.")
+                    .item(toResponse(item, claimantId))
+                    .build();
         }
 
-        return toResponse(item);
+        notificationService.createClaimResultNotification(claimer, itemId, false);
+
+        return ClaimVerificationResponse.builder()
+                .matched(false)
+                .score(score)
+                .message("Your claim does not appear to match this item.")
+                .item(toResponse(item, claimantId))
+                .build();
     }
 
     private int sortGroup(Item item) {

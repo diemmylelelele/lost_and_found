@@ -71,22 +71,29 @@ export default function ClaimVerificationPage() {
       setUploading(false)
     }
 
-    try {
-      setSubmitting(true)
-      const res = await claimWithVerification(id, {
-        name: form.name,
-        location: form.location,
-        description: form.description,
-        imageUrl,
-      })
-      const updatedItem = res.data || res
-      setResult(updatedItem.claimantId ? 'matched' : 'no_match')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit. Please try again.')
-    } finally {
-      setSubmitting(false)
+      try {
+    setSubmitting(true)
+
+    const res = await claimWithVerification(id, {
+      name: form.name,
+      location: form.location,
+      description: form.description,
+      imageUrl,
+    })
+
+    const verificationResult = res.data || res
+
+    if (verificationResult.matched === true) {
+      setResult('matched')
+    } else {
+      setResult('no_match')
     }
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to submit. Please try again.')
+  } finally {
+    setSubmitting(false)
   }
+    }
 
   if (loading) return <div className="flex justify-center py-20"><LoadingSpinner /></div>
 
@@ -102,7 +109,7 @@ export default function ClaimVerificationPage() {
           <h2 className="text-2xl font-bold mb-2" style={{ color: '#03045E' }}>High Chance Match!</h2>
           <p className="text-gray-500 mb-6 text-sm">There is a high chance your item matches this found item. The finder has been notified — contact them to discuss and confirm.</p>
           <button
-            onClick={() => navigate(`/chat/${item?.reporterId}`)}
+            onClick={() => navigate(`/chat/${item?.reporterId}?itemId=${id}`)}
             className="px-10 py-2.5 rounded-full text-sm font-semibold text-white hover:opacity-90 transition-opacity"
             style={{ backgroundColor: '#F5A623' }}
           >
@@ -269,11 +276,11 @@ export default function ClaimVerificationPage() {
             {/* Submit button */}
             <div className="flex justify-center mt-6">
               <button
-                onClick={handleSubmit}
-                disabled={submitting || uploading}
-                className="px-12 py-2.5 rounded-full text-sm font-bold disabled:opacity-60 transition-opacity hover:opacity-90 flex items-center gap-2 whitespace-nowrap"
-                style={{ backgroundColor: '#F5A623', color: '#ffffff' }}
-              >
+                  type="submit"
+                  disabled={submitting || uploading}
+                  className="px-12 py-2.5 rounded-full text-sm font-bold disabled:opacity-60 transition-opacity hover:opacity-90 flex items-center gap-2 whitespace-nowrap"
+                  style={{ backgroundColor: '#F5A623', color: '#ffffff' }}
+                >
                 {uploading ? <><LoadingSpinner size="sm" color="white" /> Uploading...</>
                  : submitting ? <><LoadingSpinner size="sm" color="white" /> Submitting...</>
                  : 'Submit'}

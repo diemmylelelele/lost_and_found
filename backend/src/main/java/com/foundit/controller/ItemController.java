@@ -1,5 +1,5 @@
 package com.foundit.controller;
-
+import com.foundit.dto.ClaimVerificationResponse;
 import com.foundit.dto.ClaimVerificationRequest;
 import com.foundit.dto.ItemRequest;
 import com.foundit.dto.ItemResponse;
@@ -87,11 +87,14 @@ public class ItemController {
 
     /** Valuable: claimer submits verification form */
     @PostMapping("/{id}/claim/verify")
-    public ResponseEntity<ItemResponse> verifyAndClaim(
+    public ResponseEntity<ClaimVerificationResponse> verifyAndClaim(
             @PathVariable Long id,
             @RequestBody ClaimVerificationRequest request,
             @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(itemService.verifyAndClaim(id, request, currentUser.getId()));
+
+        return ResponseEntity.ok(
+                itemService.verifyAndClaim(id, request, currentUser.getId())
+        );
     }
 
     @GetMapping("/my")
